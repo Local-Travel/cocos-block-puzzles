@@ -1,7 +1,6 @@
 import { _decorator, CCInteger, Component, director, instantiate, Node, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
 import { GoBoard } from './GoBoard';
 import { BlockData } from './data/BlockData';
-// import { Drag } from './Drag';
 import { Constants } from './util/Constant';
 import { Drag } from './Drag';
 const { ccclass, property } = _decorator;
@@ -41,7 +40,6 @@ export class DragControl extends Component {
             this._blockNum = this.blockCount;
             this.generateBlocks();
         }
-        console.log('this._blockNum', this._blockNum)
     }
 
     generateBlocks() {
@@ -54,18 +52,19 @@ export class DragControl extends Component {
             dragNode.setPosition(v3(startX + k * 200, 0, 0));
             dragNode.setParent(this.node);
 
-            const blockList = BlockData.getBlockStyle();
+            const styleList = BlockData.getBlockStyle();
             const posList = [];
+            const blockList = [];
 
-            // console.log(blockList);
+            // console.log(styleList);
 
-            const len = blockList.length
-            const xLen = len ? blockList[0].length : 0;
+            const len = styleList.length
+            const xLen = len ? styleList[0].length : 0;
             const yStart = -len / 2 * size - size / 2;
             const xStart = -xLen / 2 * size + size / 2;
             for (let i = 0; i < len; i++) {
                 for(let j = 0; j < xLen; j++) {
-                    const block = blockList[i][j];
+                    const block = styleList[i][j];
                     if (block) {
                         const blockNode = instantiate(this.blockPrefab);
                         blockNode.getComponent(UITransform).setContentSize(blockSize); 
@@ -78,6 +77,7 @@ export class DragControl extends Component {
                         blockNode.setParent(dragNode);
 
                         posList.push(pos);
+                        blockList.push(blockNode);
                     }
                 }
             }

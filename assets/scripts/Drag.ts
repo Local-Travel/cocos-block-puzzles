@@ -1,7 +1,5 @@
 import { _decorator, Color, Component, director, EventTouch, find, Graphics, math, Node, Rect, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
-import { DragControl } from './DragControl';
 import { Constants } from './util/Constant';
-import { Utils } from './util/Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('Drag')
@@ -36,7 +34,7 @@ export class Drag extends Component {
 
 
     start() {
-        this.drawLine()
+        // this.drawLine()
         this._dragReuslt = false
     }
 
@@ -84,9 +82,9 @@ export class Drag extends Component {
         const { x, y, width, height } = this._targetRect;
         const size = Constants.goBoard.gridSize;
 
-        if (rPos.x < x + size 
-            || rPos.x > x + width - size 
-            || rPos.y > y + height - size
+        if (rPos.x < x + size / 2 
+            || rPos.x > x + width - size / 2 
+            || rPos.y > y + height - size / 2
             || nPos.y < 0) {
             console.log('超出范围');
             return;
@@ -94,16 +92,16 @@ export class Drag extends Component {
 
         this.node.setPosition(nPos);
 
-        console.log('targetRect', this._targetRect, rPos, nPos);
+        // console.log('targetRect', this._targetRect, rPos, nPos);
         if (this._targetRect.contains(v2(rPos.x, rPos.y))) {
             this.node.setScale(1, 1);
             this._dragReuslt = Constants.goBoard.checkDragPosition(this.blockPosList, v3(rPos.x, rPos.y));
             this._rPos = v3(rPos.x, rPos.y, 0);
         } else {
             this.node.setScale(0.5, 0.5);
-            Constants.goBoard.removeRectColor();
             this._dragReuslt = false;
             this._rPos = null;
+            Constants.goBoard.removeRectColor();
         }
     }
 
@@ -111,11 +109,13 @@ export class Drag extends Component {
         if (!this._isDragAbled) return;
         if (this._dragReuslt) {
             const offset = this._dragReuslt[0];
-            const indexList = this._dragReuslt[1];
+            const rowColList = this._dragReuslt[1];
             const newPos = new Vec3(this._rPos.x + offset.x, this._rPos.y + offset.y, 0);
             this.node.setPosition(newPos);
 
-            Constants.goBoard.setFillPositionByIndex(indexList);
+            Constants.goBoard.setFillPositionByIndex(rowColList, this.blockList);
+            Constants.goBoard.checkBoardFull(rowColList);
+            Constants.goBoard.removeRectColor();
 
             this.node.parent = this.target;
             this._isDragAbled = false;

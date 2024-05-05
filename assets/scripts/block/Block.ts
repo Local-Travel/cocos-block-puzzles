@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Size, UITransform } from 'cc';
+import { _decorator, Component, tween, v3 } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('Block')
@@ -11,8 +11,10 @@ export class Block extends Component {
         
     }
 
-    setScale(scale: number) {
-        this.node.setScale(scale, scale);
+    eraseNode() {
+        tween(this.node).to(0.3, { scale: v3(0, 0, 0) }).call(() => {
+            this.node.destroy();
+        }).start();
     }
 }
 

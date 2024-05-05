@@ -1,4 +1,4 @@
-import { Vec3, _decorator } from 'cc';
+import { Vec3, _decorator, sys } from 'cc';
 
 export class Utils {
     /** 根据行列转换位置 */
@@ -13,6 +13,38 @@ export class Utils {
         const row = Math.round((pos.y - startY - size / 2) / size);
         const col = Math.round((pos.x - startX - size / 2) / size);
         return [row, col]
+    }
+
+    /**
+      * 设置本地数据
+      * @param key 
+      * @param data 
+      */
+    static setLocalStorage(key: string, data: any) {
+        try {
+            sys.localStorage.setItem(key, JSON.stringify(data))
+            return true
+        } catch (e) {
+            console.error(e)
+        }
+        return false
+    }
+
+    /**
+     * 获取本地数据
+     * @param key 
+     */
+    static getLocalStorage(key: string) {
+        try {
+            const dataStr = sys.localStorage.getItem(key)
+            if (dataStr) {
+                const data = JSON.parse(dataStr)
+                return data
+            }
+        } catch (e) {
+            console.error(e)
+        }
+        return null
     }
 }
 
