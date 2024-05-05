@@ -1,4 +1,4 @@
-import { _decorator, Component, director, instantiate, Node, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
+import { _decorator, CCInteger, Component, director, instantiate, Node, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
 import { GoBoard } from './GoBoard';
 import { BlockData } from './data/BlockData';
 // import { Drag } from './Drag';
@@ -17,6 +17,16 @@ export class DragControl extends Component {
     @property(Prefab)
     blockPrefab: Prefab = null!;
 
+    @property({ type: CCInteger })
+    blockCount: number = 3;
+
+    private _blockNum: number = 0;
+
+    protected onLoad(): void {
+        this._blockNum = this.blockCount;
+        director.on(Constants.EVENT_TYPE.SUB_DRAG_BLOCK, this.substractCount, this)
+    }
+
     start() {
         this.generateBlocks();
     }
@@ -25,12 +35,21 @@ export class DragControl extends Component {
         
     }
 
+    substractCount() {
+        this._blockNum--;
+        if (this._blockNum <= 0) {
+            this._blockNum = this.blockCount;
+            this.generateBlocks();
+        }
+        console.log('this._blockNum', this._blockNum)
+    }
+
     generateBlocks() {
         const size = this.goBoard.gridSize;
         const blockSize = new Size(size, size);
         
         const startX = -200;
-        for(let k = 0; k < 3; k++) {
+        for(let k = 0; k < this._blockNum; k++) {
             const dragNode = instantiate(this.dragNodePrefab);
             dragNode.setPosition(v3(startX + k * 200, 0, 0));
             dragNode.setParent(this.node);

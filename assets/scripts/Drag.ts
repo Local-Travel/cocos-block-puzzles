@@ -119,6 +119,8 @@ export class Drag extends Component {
 
             this.node.parent = this.target;
             this._isDragAbled = false;
+            // 减少拖拽的方块数量
+            director.emit(Constants.EVENT_TYPE.SUB_DRAG_BLOCK);
         } else {
             console.log('恢复原来位置');
             // 恢复初始位置

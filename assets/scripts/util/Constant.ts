@@ -2,8 +2,8 @@ import { _decorator, sys, Vec3 } from "cc";
 import { GoBoard } from "../GoBoard";
 
 enum EVENT_TYPE {
-  // 设置拖拽的数据
-  SET_DRAG_BLOCK = 'SET_DRAG_BLOCK',
+  /** 减少拖拽的方块数量 */ 
+  SUB_DRAG_BLOCK = 'SUB_DRAG_BLOCK',
 }
 
 export class Constants {
