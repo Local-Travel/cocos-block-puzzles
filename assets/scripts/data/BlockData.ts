@@ -102,6 +102,14 @@ export class BlockData {
             [0, 1],
             [1, 0]
         ];
+        const a7_4 = [
+            [1, 1],
+            [1, 0]
+        ];
+        const a7_5 = [
+            [1, 1],
+            [0, 1]
+        ];
         const a8 = [
             [1],
             [1]
@@ -111,7 +119,7 @@ export class BlockData {
         ]
 
         const a = [a0, a0_1, a0_2, a2, a2_1, a3, a4, a5, a6, a6_1, a7,
-            a7_1, a7_2, a7_3, a8, a8_1
+            a7_1, a7_2, a7_3, a7_4, a7_5, a8, a8_1
         ];
 
         const i = randomRangeInt(0, a.length);

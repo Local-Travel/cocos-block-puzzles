@@ -121,6 +121,9 @@ export class Drag extends Component {
             this._isDragAbled = false;
             // 减少拖拽的方块数量
             director.emit(Constants.EVENT_TYPE.SUB_DRAG_BLOCK);
+
+            // effect
+            Constants.audioManager.play('water2');
         } else {
             console.log('恢复原来位置');
             // 恢复初始位置

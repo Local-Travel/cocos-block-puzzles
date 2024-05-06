@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Graphics, macro, Vec3, math, CCInteger, UITransform, v3, Prefab, Intersection2D, Vec2, instantiate, Size } from 'cc';
+import { _decorator, Component, Node, Graphics, macro, Vec3, math, CCInteger, UITransform, v3, Prefab, Intersection2D, Vec2, instantiate, Size, Color } from 'cc';
 import { Constants } from './util/Constant';
 import { Utils } from './util/Utils';
 import { Block } from './block/Block';
@@ -29,7 +29,7 @@ export class GoBoard extends Component {
     }
 
     onLoad() {
-        this._gColor = this.node.getComponent(Graphics);
+        this._gColor = this.node.getChildByName('Color').getComponent(Graphics);
         this._g = this.boardNode.getComponent(Graphics);
         this._uiTransform = this.boardNode.getComponent(UITransform);
         this.gridSize = this._uiTransform.width / this.lineCount;
@@ -43,7 +43,7 @@ export class GoBoard extends Component {
 
     drawChessBoard() {
         // 绘制棋盘线条
-        this._g.strokeColor = math.Color.BLACK;
+        // this._g.strokeColor = new Color().fromHEX('#69DBFF');
         this._g.lineCap = Graphics.LineCap.ROUND;
         this._g.lineJoin = Graphics.LineJoin.ROUND;
 
@@ -123,7 +123,7 @@ export class GoBoard extends Component {
     }
 
     drawRectColor(posList: Vec3[]) {
-        this.fillColorList(posList, math.Color.RED);
+        this.fillColorList(posList, new Color().fromHEX('#2debff'));
     }
 
     removeRectColor() {
@@ -233,6 +233,11 @@ export class GoBoard extends Component {
         this.removeBlock(colList);
 
         this.removeInvalidDragNode();
+
+        // effect
+        if (rowList.length || colList.length) {
+            Constants.audioManager.play('erase');
+        }
     }
 
     removeBlock(list: number[][]) {
