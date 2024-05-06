@@ -23,7 +23,7 @@ export class User {
 
     public static instance() {
         if (!this._instance) {
-            const user = Utils.getLocalStorage('abnormalUser')
+            const user = Utils.getLocalStorage('blockUser')
             if (user) {
                 this._instance = new User(user.level, user.gold, user.gameProps, user.ballSkin, user.histScore)
             } else {
@@ -57,7 +57,7 @@ export class User {
     public setLevel(level: number) {
         let newLevel = level
         this.level = newLevel >= 1 ? newLevel : 1
-        Utils.setLocalStorage('abnormalUser', this)
+        Utils.setLocalStorage('blockUser', this)
     }
 
     public getGold() {
@@ -66,7 +66,7 @@ export class User {
 
     public setGold(gold: number) {
         this.gold = gold >= 0 ? gold : 0
-        Utils.setLocalStorage('abnormalUser', this)
+        Utils.setLocalStorage('blockUser', this)
     }
 
     public getHistScore() {
@@ -75,7 +75,7 @@ export class User {
 
     public setHistScore(histScore: number) {
         this.histScore = histScore >= this.histScore ? histScore : this.histScore
-        Utils.setLocalStorage('abnormalUser', this)
+        Utils.setLocalStorage('blockUser', this)
     }
 
     public getBallSkin() {
@@ -84,7 +84,7 @@ export class User {
 
     public setBallSkin(ballSkin: string) {
         this.ballSkin = ballSkin
-        Utils.setLocalStorage('abnormalUser', this)
+        Utils.setLocalStorage('blockUser', this)
     }
 
     /** 获取游戏道具 */
@@ -97,7 +97,7 @@ export class User {
         const name = Constants.PROPS_NAME[key]
         if (name) {
             this.gameProps[name] = num > 0 ? num : 0
-            Utils.setLocalStorage('abnormalUser', this)
+            Utils.setLocalStorage('blockUser', this)
         }
     }
 }
