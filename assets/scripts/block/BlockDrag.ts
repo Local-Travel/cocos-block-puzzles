@@ -4,6 +4,7 @@ const { ccclass, property } = _decorator;
 
 @ccclass('BlockDrag')
 export class BlockDrag extends Component {
+    private _styleList: any[] = [];
     private _blockList: any[] = [];
     private _blockPosList: Vec3[] = [];
 
@@ -45,6 +46,14 @@ export class BlockDrag extends Component {
         g.fillColor = Color.BLUE;
         g.fillRect(x, y, width, height)
         g.fill();
+    }
+
+    setStyleList(list: any[]) {
+        this._styleList = list;
+    }
+
+    getStyleList() {
+        return this._styleList;
     }
 
     setBlockList(list: any[]) {

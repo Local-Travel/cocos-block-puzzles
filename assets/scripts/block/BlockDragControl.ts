@@ -21,6 +21,8 @@ export class BlockDragControl extends Component {
     private _rPos: Vec3 = null;
     private _startPos: Vec3 = null;
 
+    private _dragBlockList: BlockDrag[] = [];
+
     private _dragReuslt: boolean | [Vec3, number[]] = false;
 
     protected onLoad(): void {
@@ -28,8 +30,6 @@ export class BlockDragControl extends Component {
         if (this.target) {
             this._targetRect = this.target.getComponent(UITransform).getBoundingBox();
         }
-
-        director.on(Constant.EVENT_TYPE.SUB_DRAG_BLOCK, this.substractCount, this)
     }
 
     start() {
@@ -40,11 +40,16 @@ export class BlockDragControl extends Component {
         
     }
 
-    substractCount() {
+    substractCount(drag: BlockDrag) {
         this._blockNum--;
         if (this._blockNum <= 0) {
             this._blockNum = this.blockCount;
+            this._dragBlockList = [];
             this.generateBlocks();
+        } else {
+            const list = this._dragBlockList.filter(item => item !== drag);
+            this._dragBlockList = list;
+            console.log('this._dragBlockList', this._dragBlockList);
         }
     }
 
@@ -91,7 +96,10 @@ export class BlockDragControl extends Component {
             const blockDrag = dragNode.getComponent(BlockDrag);
             blockDrag.setBlockList(blockList);
             blockDrag.setBlockPosList(posList);
+            blockDrag.setStyleList(styleList);
             blockDrag.setScale(0.5, 0.5);
+
+            this._dragBlockList.push(blockDrag);
         }
     }
 
@@ -118,7 +126,7 @@ export class BlockDragControl extends Component {
 
         drag.setPosition(nPos);
 
-        console.log('targetRect', this._targetRect, rPos, nPos);
+        // console.log('targetRect', this._targetRect, rPos, nPos);
         if (this._targetRect.contains(v2(rPos.x, rPos.y))) {
             drag.setScale(1, 1);
             this._dragReuslt = Constant.blockManager.checkDragPosition(drag.getBlockPosList(), v3(rPos.x, rPos.y));
@@ -145,7 +153,7 @@ export class BlockDragControl extends Component {
             drag.setParent(this.target);
             drag.setDragAbled(false);
             // 减少拖拽的方块数量
-            director.emit(Constant.EVENT_TYPE.SUB_DRAG_BLOCK);
+            this.substractCount(drag);
 
             // effect
             Constant.audioManager.play('water2');
@@ -157,6 +165,28 @@ export class BlockDragControl extends Component {
             drag.setDragAbled(true);
             this._dragReuslt = false;
         }
+
+        this.checkResult();
+    }
+
+    checkResult() {
+        if (!this.checkEmptyDragBlock()) {// 结束
+            console.log('结束');
+            Constant.dialogManager.showTipLabel('已没有可放的位置');
+        }
+    }
+
+    checkEmptyDragBlock() {
+        let flag = false;
+        for(let i = 0; i < this._dragBlockList.length; i++) {
+            const blockDrag = this._dragBlockList[i];
+            const styleList = blockDrag.getStyleList();
+            if (Constant.blockManager.checkBoardEmptyModelSize(styleList)) {
+                flag = true;
+                break;
+            }
+        }
+        return flag;
     }
 }
 

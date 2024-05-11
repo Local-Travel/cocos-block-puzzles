@@ -1,9 +1,9 @@
 import { _decorator, Component, Node, Graphics, macro, Vec3, math, CCInteger, UITransform, v3, Prefab, Intersection2D, Vec2, instantiate, Size, Color, EventTouch } from 'cc';
 import { Constant } from '../util/Constant';
 import { Utils } from '../util/Utils';
-import { Hex } from '../hex/Hex';
 import { BlockDragControl } from './BlockDragControl';
 import { BlockDrag } from './BlockDrag';
+import { Block } from './Block';
 const { ccclass, property } = _decorator;
 
 @ccclass('BlockManager')
@@ -130,6 +130,15 @@ export class BlockManager extends Component {
         return this._blockPosList[index].slice();
     }
 
+    isEmptyPos(row: number, col: number, index: number = -1) {
+        const k = index !== -1 ? index : this.getIndex(row, col);
+        if (!this._blockPosList.length || k < 0 || k >= this._blockPosList.length) {
+            return false;
+        }
+        const val = this.getGridPosVal(k);
+        return val && val[1] === 0;
+    }
+
     fillColor(pos: Vec3, color: math.Color) {
         const x = pos.x - this.gridSize / 2 + 3;
         const y = pos.y - this.gridSize / 2 + 3;
@@ -176,7 +185,7 @@ export class BlockManager extends Component {
             const [row, col] = Utils.convertPosToRowCol(newPos, this.gridSize, this.startX, this.startY)
             const index = this.getIndex(row, col);
             const gridPos = this.getGridPosVal(index);
-            console.log('gridPos', gridPos);
+            // console.log('gridPos', gridPos);
             // console.log('row', row, col)
             if (row < 0 || row >= this.lineCount || col < 0 || col >= this.lineCount) {
                 console.log('超出大盘范围')
@@ -210,8 +219,6 @@ export class BlockManager extends Component {
     setFillPositionByIndex(rowColList: number[], blockList: Node[]) {
         for (let i = 0; i < rowColList.length; i++) {
             const index = this.getIndex(rowColList[i][0], rowColList[i][1]);
-            // this._blockPosList[index][1] = 1;
-            // this._blockPosList[index][2] = blockList[i];
             this.setGridPosVal(index, 1, blockList[i]);
         }
     }
@@ -271,6 +278,76 @@ export class BlockManager extends Component {
         }
     }
 
+    /** 检查是否有空模块位置 */
+    checkBoardEmptyModelSize(size: number[][]) {
+        if (!size || size.length === 0) return true;
+
+        const row = this.lineCount;
+        const col = this.lineCount;
+        const rowIndexList = [];
+        let mIndex = 0;
+        const srow = size.length;
+        const scol = size.reduce(((pre, cur, i) => {
+            if (cur && Array.isArray(cur)) {
+                const validArr = cur.filter(k => k > 0);
+                if (pre < validArr.length) {
+                    mIndex = i;
+                    return validArr.length;
+                }
+            }
+            return pre;
+        }), 0);
+        // 横向检查, 检查出符合行数
+        for (let i = 0; i < row; i++) {
+            let k = 0;
+            for(let j = 0; j < col; j++) {
+                if (this.isEmptyPos(i, j)) {
+                    k++;
+                    if (k >= scol) {
+                        rowIndexList.push([i, j - scol + 1]);
+                        if (srow === 1) {
+                            return true;
+                        }
+                    }
+                } else {
+                    k = 0;
+                }
+            }
+        }
+
+        if (rowIndexList.length === 0) return false;
+
+        // console.log('rowIndexList', rowIndexList);
+        for(let k = 0; k < rowIndexList.length; k++) {
+            const item = rowIndexList[k];
+            if (this.checkSizeIsValid(size, item[0], item[1], row, mIndex)) {
+                console.log('valid pos', item);
+                return true;
+            }
+        }
+
+        return false;
+        
+    }
+
+    checkSizeIsValid(size: number[][], gridRow: number, gridCol: number, row: number, mIndex: number) {
+        const startRow = gridRow - mIndex;
+        // console.log('startRow', startRow);
+        if (startRow < 0) return false;
+        for(let i = 0; i < size.length; i++) {
+            for(let j = 0; j < size[i].length; j++) {
+                const val = size[i][j];
+                const r = i + startRow;
+                const c = j + gridCol;
+                if (r >= row) return false;
+                if (!val) continue;
+                if (this.isEmptyPos(r, c)) continue;
+                return false;
+            }
+        }
+        return true;
+    }
+
     removeBlock(list: number[][]) {
         for(let i = 0; i < list.length; i++) {
             const indexList = list[i];
@@ -280,7 +357,7 @@ export class BlockManager extends Component {
                 if (!gridPos) continue;
                 const blockNode = gridPos[2];
                 if (blockNode) {
-                    blockNode.getComponent(Hex).eraseNode()
+                    blockNode.getComponent(Block).eraseNode()
                 }
                 this.setGridPosVal(index, 0, null);
             }
