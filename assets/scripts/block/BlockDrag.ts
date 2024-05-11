@@ -23,8 +23,8 @@ export class BlockDrag extends Component {
         this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
         this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
         this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
-        this.container = find('Canvas/PageGame/Main/DragContainer');
-        this.target = find('Canvas/PageGame/Main/BoardBg/BoardNode');
+        this.container = find('Canvas/PageBlock/Main/DragContainer');
+        this.target = find('Canvas/PageBlock/Main/BoardBg/BoardNode');
         
 
         if (this.target) {
