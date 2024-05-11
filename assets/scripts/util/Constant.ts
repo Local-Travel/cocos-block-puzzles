@@ -1,5 +1,5 @@
 import { _decorator, sys, Vec3 } from "cc";
-import { GoBoard } from "../GoBoard";
+import { BlockManager } from "../block/BlockManager";
 import { AudioManager } from "../audio/AudioManager";
 import { GameManager } from "../GameManager";
 
@@ -26,10 +26,10 @@ const PROPS_TYPE = {
   },
 }
 
-export class Constants {
+export class Constant {
   // class
   static gameManager: GameManager;
-  static goBoard: GoBoard;
+  static blockManager: BlockManager;
   static audioManager: AudioManager;
   
   // game

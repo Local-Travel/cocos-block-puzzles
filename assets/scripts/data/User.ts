@@ -1,6 +1,6 @@
 import { _decorator, Component, Node } from 'cc';
 import { Utils } from '../util/Utils';
-import { Constants } from '../util/Constant';
+import { Constant } from '../util/Constant';
 const { ccclass, property } = _decorator;
 
 @ccclass('User')
@@ -41,8 +41,8 @@ export class User {
         /** 游戏道具使用对象存储 */
         if (!gameProps) {
             let obj = {}
-            for(let key in Constants.PROPS_NAME) {
-                obj[Constants.PROPS_NAME[key]] = this.propsNum
+            for(let key in Constant.PROPS_NAME) {
+                obj[Constant.PROPS_NAME[key]] = this.propsNum
             }
             this.gameProps = obj
         } else {
@@ -94,7 +94,7 @@ export class User {
 
     /** 设置游戏道具 */
     public setGameProps(key: string, num: number) {
-        const name = Constants.PROPS_NAME[key]
+        const name = Constant.PROPS_NAME[key]
         if (name) {
             this.gameProps[name] = num > 0 ? num : 0
             Utils.setLocalStorage('blockUser', this)

@@ -1,11 +1,11 @@
 import { _decorator, Component, Node, Graphics, macro, Vec3, math, CCInteger, UITransform, v3, Prefab, Intersection2D, Vec2, instantiate, Size, Color } from 'cc';
-import { Constants } from './util/Constant';
-import { Utils } from './util/Utils';
-import { Block } from './block/Block';
+import { Constant } from '../util/Constant';
+import { Utils } from '../util/Utils';
+import { Block } from '../block/Block';
 const { ccclass, property } = _decorator;
 
-@ccclass('GoBoard')
-export class GoBoard extends Component {
+@ccclass('BlockManager')
+export class BlockManager extends Component {
     @property(Node)
     page: Node = null; // 页面坐标
     @property(Node)
@@ -25,7 +25,7 @@ export class GoBoard extends Component {
     private _uiTransform: UITransform = null;
 
     protected __preload(): void {
-        Constants.goBoard = this;
+        Constant.blockManager = this;
     }
 
     onLoad() {
@@ -236,7 +236,7 @@ export class GoBoard extends Component {
 
         // effect
         if (rowList.length || colList.length) {
-            Constants.audioManager.play('erase');
+            Constant.audioManager.play('erase');
         }
     }
 

@@ -1,16 +1,16 @@
 import { _decorator, CCInteger, Component, director, instantiate, Node, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
-import { GoBoard } from './GoBoard';
-import { BlockData } from './data/BlockData';
-import { Constants } from './util/Constant';
-import { Drag } from './Drag';
+import { BlockManager } from './BlockManager';
+import { BlockData } from '../data/BlockData';
+import { Constant } from '../util/Constant';
+import { BlockDrag } from './BlockDrag';
 const { ccclass, property } = _decorator;
 
-@ccclass('DragControl')
-export class DragControl extends Component {
+@ccclass('BlockDragControl')
+export class BlockDragControl extends Component {
     @property(Node)
     page: Node = null;
-    @property(GoBoard)
-    goBoard: GoBoard = null!;
+    @property(BlockManager)
+    goBoard: BlockManager = null!;
     @property(Prefab)
     dragNodePrefab: Prefab = null!;
     @property(Prefab)
@@ -23,7 +23,7 @@ export class DragControl extends Component {
 
     protected onLoad(): void {
         this._blockNum = this.blockCount;
-        director.on(Constants.EVENT_TYPE.SUB_DRAG_BLOCK, this.substractCount, this)
+        director.on(Constant.EVENT_TYPE.SUB_DRAG_BLOCK, this.substractCount, this)
     }
 
     start() {
@@ -82,8 +82,8 @@ export class DragControl extends Component {
                 }
             }
             dragNode.getComponent(UITransform).setContentSize(new Size(xLen * size, len * size));
-            dragNode.getComponent(Drag).setBlockList(blockList);
-            dragNode.getComponent(Drag).setBlockPosList(posList);
+            dragNode.getComponent(BlockDrag).setBlockList(blockList);
+            dragNode.getComponent(BlockDrag).setBlockPosList(posList);
             dragNode.setScale(0.5, 0.5);
         }
     }

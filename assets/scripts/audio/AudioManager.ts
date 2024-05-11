@@ -1,5 +1,5 @@
 import { _decorator, AudioClip, AudioSource, Component, Node } from 'cc';
-import { Constants } from '../util/Constant';
+import { Constant } from '../util/Constant';
 const { ccclass, property } = _decorator;
 
 interface IAudioMap {
@@ -25,7 +25,7 @@ interface IAudioMap {
     private _isDisabled = false
 
     __preload () {
-        Constants.audioManager = this
+        Constant.audioManager = this
     }
  
     start () {

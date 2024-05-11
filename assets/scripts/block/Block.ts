@@ -1,5 +1,5 @@
 import { _decorator, Component, tween, v3 } from 'cc';
-import { Constants } from '../util/Constant';
+import { Constant } from '../util/Constant';
 const { ccclass, property } = _decorator;
 
 @ccclass('Block')

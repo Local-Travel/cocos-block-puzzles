@@ -1,9 +1,9 @@
 import { _decorator, Color, Component, director, EventTouch, find, Graphics, math, Node, Rect, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
-import { Constants } from './util/Constant';
+import { Constant } from '../util/Constant';
 const { ccclass, property } = _decorator;
 
-@ccclass('Drag')
-export class Drag extends Component {
+@ccclass('BlockDrag')
+export class BlockDrag extends Component {
     page: Node = null;
     target: Node = null;
     container: Node = null;
@@ -80,7 +80,7 @@ export class Drag extends Component {
 
         const rPos = this.getRelativePosition(new Vec2(nPos.x, nPos.y));
         const { x, y, width, height } = this._targetRect;
-        const size = Constants.goBoard.gridSize;
+        const size = Constant.blockManager.gridSize;
 
         if (rPos.x < x + size / 2 
             || rPos.x > x + width - size / 2 
@@ -95,13 +95,13 @@ export class Drag extends Component {
         // console.log('targetRect', this._targetRect, rPos, nPos);
         if (this._targetRect.contains(v2(rPos.x, rPos.y))) {
             this.node.setScale(1, 1);
-            this._dragReuslt = Constants.goBoard.checkDragPosition(this.blockPosList, v3(rPos.x, rPos.y));
+            this._dragReuslt = Constant.blockManager.checkDragPosition(this.blockPosList, v3(rPos.x, rPos.y));
             this._rPos = v3(rPos.x, rPos.y, 0);
         } else {
             this.node.setScale(0.5, 0.5);
             this._dragReuslt = false;
             this._rPos = null;
-            Constants.goBoard.removeRectColor();
+            Constant.blockManager.removeRectColor();
         }
     }
 
@@ -113,17 +113,17 @@ export class Drag extends Component {
             const newPos = new Vec3(this._rPos.x + offset.x, this._rPos.y + offset.y, 0);
             this.node.setPosition(newPos);
 
-            Constants.goBoard.setFillPositionByIndex(rowColList, this.blockList);
-            Constants.goBoard.checkBoardFull(rowColList);
-            Constants.goBoard.removeRectColor();
+            Constant.blockManager.setFillPositionByIndex(rowColList, this.blockList);
+            Constant.blockManager.checkBoardFull(rowColList);
+            Constant.blockManager.removeRectColor();
 
             this.node.parent = this.target;
             this._isDragAbled = false;
             // 减少拖拽的方块数量
-            director.emit(Constants.EVENT_TYPE.SUB_DRAG_BLOCK);
+            director.emit(Constant.EVENT_TYPE.SUB_DRAG_BLOCK);
 
             // effect
-            Constants.audioManager.play('water2');
+            Constant.audioManager.play('water2');
         } else {
             console.log('恢复原来位置');
             // 恢复初始位置

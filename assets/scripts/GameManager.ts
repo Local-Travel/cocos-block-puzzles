@@ -1,5 +1,5 @@
 import { _decorator, CCInteger, Component, Node } from 'cc';
-import { Constants } from './util/Constant';
+import { Constant } from './util/Constant';
 import { User } from './data/User';
 import { BlockData } from './data/BlockData';
 const { ccclass, property } = _decorator;
@@ -15,7 +15,7 @@ export class GameManager extends Component {
     private _userLevel: number = 1;
 
     protected __preload(): void {
-        Constants.gameManager = this;
+        Constant.gameManager = this;
     }
     
     start() {
@@ -35,7 +35,7 @@ export class GameManager extends Component {
         this._userLevel = userLevel;
 
         // 设置方块数据
-        Constants.goBoard.setBlockData(list);
+        Constant.blockManager.setBlockData(list);
     }
 }
 
