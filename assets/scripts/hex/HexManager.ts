@@ -2,18 +2,18 @@ import { _decorator, Component, Node, Graphics, macro, Vec3, math, CCInteger, UI
 import { Constant } from '../util/Constant';
 import { Utils } from '../util/Utils';
 import { Hex } from '../hex/Hex';
-import { BlockDragControl } from './BlockDragControl';
-import { BlockDrag } from './BlockDrag';
+import { HexDragControl } from './HexDragControl';
+import { HexDrag } from './HexDrag';
 const { ccclass, property } = _decorator;
 
-@ccclass('BlockManager')
-export class BlockManager extends Component {
+@ccclass('HexManager')
+export class HexManager extends Component {
     @property(Node)
     boardNode: Node = null; // 棋盘节点
     @property(Prefab)
-    blockPrefab: Prefab = null;
-    @property(BlockDragControl)
-    blockDragControl: BlockDragControl = null;
+    hexPrefab: Prefab = null;
+    @property(HexDragControl)
+    hexDragControl: HexDragControl = null;
     @property(CCInteger)
     lineCount: number = 10; // 棋盘格子行列数
 
@@ -27,7 +27,7 @@ export class BlockManager extends Component {
     private _blockPosList: any[] = [] // 每个点的位置
 
     protected __preload(): void {
-        Constant.blockManager = this;
+        Constant.hexManager = this;
     }
 
     onLoad() {
@@ -105,12 +105,12 @@ export class BlockManager extends Component {
         for(let i = 0; i < this._blockPosList.length; i++) {
             const pos = this._blockPosList[i][0];
             if (list[i] > 0) {
-                const blockNode = instantiate(this.blockPrefab);
-                blockNode.getComponent(UITransform).setContentSize(size);
-                blockNode.setPosition(pos);
-                blockNode.parent = this.boardNode;
+                const hexNode = instantiate(this.hexPrefab);
+                hexNode.getComponent(UITransform).setContentSize(size);
+                hexNode.setPosition(pos);
+                hexNode.parent = this.boardNode;
 
-                this.setGridPosVal(i, 1, blockNode);
+                this.setGridPosVal(i, 1, hexNode);
             }
         }
     }
@@ -278,9 +278,9 @@ export class BlockManager extends Component {
                 const index = indexList[j];
                 const gridPos = this.getGridPosVal(index);
                 if (!gridPos) continue;
-                const blockNode = gridPos[2];
-                if (blockNode) {
-                    blockNode.getComponent(Hex).eraseNode()
+                const hexNode = gridPos[2];
+                if (hexNode) {
+                    hexNode.getComponent(Hex).eraseNode()
                 }
                 this.setGridPosVal(index, 0, null);
             }
@@ -298,16 +298,17 @@ export class BlockManager extends Component {
         }
     }
 
-    handleTouchStart(event: EventTouch, drag: BlockDrag) {
-        this.blockDragControl && this.blockDragControl.handleTouchStart(event, drag);
+    handleTouchStart(event: EventTouch, drag: HexDrag) {
+        this.hexDragControl && this.hexDragControl.handleTouchStart(event, drag);
     }
 
-    handleTouchMove(event: EventTouch, drag: BlockDrag) {
-        this.blockDragControl && this.blockDragControl.handleTouchMove(event, drag);
+    handleTouchMove(event: EventTouch, drag: HexDrag) {
+        this.hexDragControl && this.hexDragControl.handleTouchMove(event, drag);
     }
 
-    handleTouchEnd(event: EventTouch, drag: BlockDrag) {
-        this.blockDragControl && this.blockDragControl.handleTouchEnd(event, drag);
+    handleTouchEnd(event: EventTouch, drag: HexDrag) {
+        this.hexDragControl && this.hexDragControl.handleTouchEnd(event, drag);
     }
 }
+
 

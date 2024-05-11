@@ -1,15 +1,15 @@
 import { _decorator, CCInteger, Component, director, EventTouch, instantiate, Node, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
 import { BlockData } from '../data/BlockData';
 import { Constant } from '../util/Constant';
-import { BlockDrag } from './BlockDrag';
+import { HexDrag } from './HexDrag';
 const { ccclass, property } = _decorator;
 
-@ccclass('BlockDragControl')
-export class BlockDragControl extends Component {
+@ccclass('HexDragControl')
+export class HexDragControl extends Component {
     @property(Prefab)
     dragNodePrefab: Prefab = null!;
     @property(Prefab)
-    blockPrefab: Prefab = null!;
+    hexPrefab: Prefab = null!;
     @property(Node)
     target: Node = null!;
 
@@ -49,7 +49,7 @@ export class BlockDragControl extends Component {
     }
 
     generateBlocks() {
-        const size = Constant.blockManager.gridSize;
+        const size = Constant.hexManager.gridSize;
         const blockSize = new Size(size, size);
         
         const startX = -200;
@@ -72,41 +72,41 @@ export class BlockDragControl extends Component {
                 for(let j = 0; j < xLen; j++) {
                     const block = styleList[i][j];
                     if (block) {
-                        const blockNode = instantiate(this.blockPrefab);
-                        blockNode.getComponent(UITransform).setContentSize(blockSize); 
+                        const hexNode = instantiate(this.hexPrefab);
+                        hexNode.getComponent(UITransform).setContentSize(blockSize); 
                         
                         const y = yStart + (len - i) * size;
                         const x = xStart + j * size;
                         const pos = v3(x, y, 0);
     
-                        blockNode.setPosition(pos);
-                        blockNode.setParent(dragNode);
+                        hexNode.setPosition(pos);
+                        hexNode.setParent(dragNode);
 
                         posList.push(pos);
-                        blockList.push(blockNode);
+                        blockList.push(hexNode);
                     }
                 }
             }
             dragNode.getComponent(UITransform).setContentSize(new Size(xLen * size, len * size));
-            const blockDrag = dragNode.getComponent(BlockDrag);
-            blockDrag.setBlockList(blockList);
-            blockDrag.setBlockPosList(posList);
-            blockDrag.setScale(0.5, 0.5);
+            const hexDrag = dragNode.getComponent(HexDrag);
+            hexDrag.setBlockList(blockList);
+            hexDrag.setBlockPosList(posList);
+            hexDrag.setScale(0.5, 0.5);
         }
     }
 
-    handleTouchStart(event: EventTouch, drag: BlockDrag) {
+    handleTouchStart(event: EventTouch, drag: HexDrag) {
         this._startPos = drag.getPosition();
     }
 
-    handleTouchMove(event: EventTouch, drag: BlockDrag) {
+    handleTouchMove(event: EventTouch, drag: HexDrag) {
         if (!this._targetRect) return;
         const touchPos = event.getLocation();
         const nPos = drag.getNodeSpacePosition(touchPos);
 
         const rPos = drag.getRelativePosition(new Vec2(nPos.x, nPos.y));
         const { x, y, width, height } = this._targetRect;
-        const size = Constant.blockManager.gridSize;
+        const size = Constant.hexManager.gridSize;
 
         if (rPos.x < x + size / 2 
             || rPos.x > x + width - size / 2 
@@ -121,26 +121,26 @@ export class BlockDragControl extends Component {
         console.log('targetRect', this._targetRect, rPos, nPos);
         if (this._targetRect.contains(v2(rPos.x, rPos.y))) {
             drag.setScale(1, 1);
-            this._dragReuslt = Constant.blockManager.checkDragPosition(drag.getBlockPosList(), v3(rPos.x, rPos.y));
+            this._dragReuslt = Constant.hexManager.checkDragPosition(drag.getBlockPosList(), v3(rPos.x, rPos.y));
             this._rPos = v3(rPos.x, rPos.y, 0);
         } else {
             drag.setScale(0.5, 0.5);
             this._dragReuslt = false;
             this._rPos = null;
-            Constant.blockManager.removeRectColor();
+            Constant.hexManager.removeRectColor();
         }
     }
 
-    handleTouchEnd(event: EventTouch, drag: BlockDrag) {
+    handleTouchEnd(event: EventTouch, drag: HexDrag) {
         if (this._dragReuslt) {
             const offset = this._dragReuslt[0];
             const rowColList = this._dragReuslt[1];
             const newPos = new Vec3(this._rPos.x + offset.x, this._rPos.y + offset.y, 0);
             drag.setPosition(newPos);
 
-            Constant.blockManager.setFillPositionByIndex(rowColList, drag.getBlockList());
-            Constant.blockManager.checkBoardFull(rowColList);
-            Constant.blockManager.removeRectColor();
+            Constant.hexManager.setFillPositionByIndex(rowColList, drag.getBlockList());
+            Constant.hexManager.checkBoardFull(rowColList);
+            Constant.hexManager.removeRectColor();
 
             drag.setParent(this.target);
             drag.setDragAbled(false);

@@ -35,7 +35,7 @@ export class GameManager extends Component {
         this._userLevel = userLevel;
 
         // 设置方块数据
-        Constant.blockManager.setBlockData(list);
+        Constant.blockManager.init(list);
     }
 }
 

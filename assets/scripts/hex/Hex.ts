@@ -1,8 +1,9 @@
-import { _decorator, Component, Node, tween, v3 } from 'cc';
+import { _decorator, Component, tween, v3 } from 'cc';
+import { Constant } from '../util/Constant';
 const { ccclass, property } = _decorator;
 
-@ccclass('Block')
-export class Block extends Component {
+@ccclass('Hex')
+export class Hex extends Component {
 
     // 类型
     public blockType: number = 0;

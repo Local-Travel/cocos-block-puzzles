@@ -2,8 +2,8 @@ import { _decorator, Color, Component, director, EventTouch, find, Graphics, mat
 import { Constant } from '../util/Constant';
 const { ccclass, property } = _decorator;
 
-@ccclass('BlockDrag')
-export class BlockDrag extends Component {
+@ccclass('HexDrag')
+export class HexDrag extends Component {
     private _blockList: any[] = [];
     private _blockPosList: Vec3[] = [];
 
@@ -11,7 +11,7 @@ export class BlockDrag extends Component {
     private _isDragAbled: boolean = true;
 
     onLoad() {
-        // console.log('BlockDrag onLoad') 
+        // console.log('HexDrag onLoad') 
         this._originPos = this.node.position.clone();
         this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this);
         this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
@@ -90,19 +90,19 @@ export class BlockDrag extends Component {
     onTouchStart(event: EventTouch) {
         // console.log('onTouchStart', this._isDragAbled);
         if (!this._isDragAbled) return;
-        Constant.blockManager.handleTouchStart(event, this);
+        Constant.hexManager.handleTouchStart(event, this);
     }
 
     onTouchMove(event: EventTouch) {
         // console.log('onTouchMove', this._isDragAbled);
         if (!this._isDragAbled) return;
-        Constant.blockManager.handleTouchMove(event, this);
+        Constant.hexManager.handleTouchMove(event, this);
     }
 
     onTouchEnd(event: EventTouch) {
         // console.log('onTouchEnd', this._isDragAbled);
         if (!this._isDragAbled) return;
-        Constant.blockManager.handleTouchEnd(event, this);
+        Constant.hexManager.handleTouchEnd(event, this);
     }
 
     getNodeSpacePosition(pos: Vec2) {
