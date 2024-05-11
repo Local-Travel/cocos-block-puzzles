@@ -1,0 +1,11 @@
+Model Information:
+* title:	BattleTech Hex Bases
+* source:	https://sketchfab.com/3d-models/battletech-hex-bases-109b44bb723745319c8ffbe7f73e9b52
+* author:	np-dev (https://sketchfab.com/np-dev)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "BattleTech Hex Bases" (https://sketchfab.com/3d-models/battletech-hex-bases-109b44bb723745319c8ffbe7f73e9b52) by np-dev (https://sketchfab.com/np-dev) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

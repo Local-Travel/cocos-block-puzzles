@@ -1,0 +1,94 @@
+{
+  "ver": "2.3.12",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "fe9739a5-ba06-4885-a128-3cd3aeb11df8",
+  "files": [],
+  "subMetas": {
+    "4f4f4": {
+      "importer": "gltf-mesh",
+      "uuid": "fe9739a5-ba06-4885-a128-3cd3aeb11df8@4f4f4",
+      "displayName": "",
+      "id": "4f4f4",
+      "name": "Object_0.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 104
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "35b08": {
+      "importer": "gltf-material",
+      "uuid": "fe9739a5-ba06-4885-a128-3cd3aeb11df8@35b08",
+      "displayName": "",
+      "id": "35b08",
+      "name": "Scene_-_Root.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "d1932": {
+      "importer": "gltf-scene",
+      "uuid": "fe9739a5-ba06-4885-a128-3cd3aeb11df8@d1932",
+      "displayName": "",
+      "id": "d1932",
+      "name": "hex.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "redirect": "fe9739a5-ba06-4885-a128-3cd3aeb11df8@d1932",
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "fe9739a5-ba06-4885-a128-3cd3aeb11df8@4f4f4"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "fe9739a5-ba06-4885-a128-3cd3aeb11df8@35b08"
+      ],
+      "scenes": [
+        "fe9739a5-ba06-4885-a128-3cd3aeb11df8@d1932"
+      ]
+    }
+  }
+}
