@@ -4,6 +4,7 @@ interface LevelData {
     level?: number
     score: number
     skinCount: number
+    createSkinCount: number
     targetCount: number
     targetIcon: number
     name: string
@@ -21,6 +22,7 @@ export class HexData {
                 level: 0,
                 score: 600,
                 skinCount: 3,
+                createSkinCount: 2,
                 targetCount: 0,
                 targetIcon: 0,
                 name: '关卡 1',

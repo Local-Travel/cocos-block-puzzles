@@ -35,24 +35,6 @@ export class HexManager extends Component {
         this.clearHexList();      
     }
 
-    /** 批量生成多个指定位置的hex */
-    generatePreHexList(list: number[], col: number) {
-        const startPoint = Constant.HEX_GRID_START_POINT;
-        const hexSize = Constant.HEX_SIZE;
-        const row = Math.ceil(list.length / col);
-        // 先清空所有hex
-        this.clearHexList();
-        for(let i = 0; i < row; i++){
-            for(let j = 0; j < col; j++){
-                const k = i * col + j;
-                if (list[k] > 0) {
-                    const pos = Utils.convertRowColToPosHexagon(i, j, hexSize, startPoint.x, startPoint.z);
-                    this.batchGenerateHexList(list[k], pos);
-                }
-            }
-        }
-    }
-
     /** 生成单个六边形 */
     createHex(pos: Vec3, hexType: number) {
         const [path, name] = this.getHexType(hexType);
@@ -63,22 +45,19 @@ export class HexManager extends Component {
 
         const hexComp = hexNode.getComponent(Hex);
         hexComp.setHexType(name);
+        hexComp.setOriginParent(this.node);
 
         this._hexList.push(hexComp);
 
         return hexComp;
     }
 
-    batchGenerateHexList(count: number, pos: Vec3, hexTypeList: number[] = [], skinLimitCount: number = 0) {
+    batchGenerateHexList(count: number, pos: Vec3, skinLimitCount: number = 0, skinMaxCount: number = 0) {
         const hexList: Hex[] = []
         let num = count, skinList = [];
-        let len = hexTypeList.length;
-        if (len > 0) {
-            skinList = hexTypeList;
-        } else {
-            skinList = this.getSkinList(0, skinLimitCount);
-        }
-        len = skinList.length;
+        let len = skinLimitCount;
+        skinList = this.getSkinList(skinLimitCount, skinMaxCount);
+        len = skinLimitCount > 0 ? Math.min(skinList.length, skinLimitCount) : skinList.length;
         let index = 0;
         for(let i = 0; i < len; i++) {
             const max = Math.floor(num / (len - i));
@@ -103,8 +82,9 @@ export class HexManager extends Component {
         const skinCount = count > 0 ? count : math.randomRangeInt(1, skinMaxCount + 1);
         const skinList = []
         for(let i = 0; i < skinCount; i++) {
-            const code = math.randomRangeInt(1, 100)
-            skinList.push(code)
+            let rand = math.randomRangeInt(1, 100);
+            rand = rand % (skinMaxCount + 1);
+            skinList.push(rand);
         }
         return skinList;
     }

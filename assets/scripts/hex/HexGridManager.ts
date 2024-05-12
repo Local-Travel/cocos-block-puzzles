@@ -2,6 +2,7 @@ import { _decorator, CCInteger, Component, instantiate, Material, MeshRenderer, 
 import { Constant } from '../util/Constant';
 import { Utils } from '../util/Utils';
 import { HexGrid } from './HexGrid';
+import { Hex } from './Hex';
 const { ccclass, property } = _decorator;
 
 @ccclass('HexGridManager')
@@ -14,7 +15,8 @@ export class HexGridManager extends Component {
 
     private _gridList: HexGrid[] = [];
     private _gridSkinType: string = "Style1";// 格子皮肤类型
-    private _hexSkinCountLimit: number = 0;// 皮肤数量限制
+    private _hexSkinCountMax: number = 0;
+    private _hexSkinCountLimit: number = 0
     private _col = 0;// 列数
 
     protected __preload(): void {
@@ -29,8 +31,9 @@ export class HexGridManager extends Component {
         
     }
 
-    init(list: number[], col: number, skinCount: number) {
-        this._hexSkinCountLimit = skinCount;
+    init(list: number[], col: number, skinCount: number, createSkinCount: number) {
+        this._hexSkinCountMax = skinCount;
+        this._hexSkinCountLimit = createSkinCount;
         this._col = col;
         this.draw3DHexGrid(list, col);
     }
@@ -55,7 +58,7 @@ export class HexGridManager extends Component {
                 hexGrid.setMaxHexCount(this.maxHexCount);
                 
                 if (list[k] > 0) {
-                    const hexList = Constant.hexManager.batchGenerateHexList(list[k], pos, [], this._hexSkinCountLimit);
+                    const hexList = Constant.hexManager.batchGenerateHexList(list[k], pos, this._hexSkinCountLimit, this._hexSkinCountMax);
                     hexGrid.setHexList(hexList);
                 }
             }
@@ -94,9 +97,29 @@ export class HexGridManager extends Component {
         this.setMaterial(hexGrid.node, path);
     }
 
+    setGridHexList(hexGrid: HexGrid, hexList: Hex[]) {
+        if (hexGrid && hexGrid.isEmpty()) {
+            const pos = hexGrid.getPosition();
+            hexGrid.setHexList(hexList);
+            // 重新设置位置和parent
+            hexList.forEach(hex => {
+                const oldPos = hex.getPosition();
+                const newPos = new Vec3(pos.x, oldPos.y, pos.z);
+                hex.setPosition(newPos);
+                hex.resetOriginParent();
+            });
+            return true;
+        }
+        return false;
+    }
+
     getGridByPos(pos: Vec3) {
         const startPoint = Constant.HEX_GRID_START_POINT;
         const [row, col] = Utils.convertPosToRowColHexagon(pos, Constant.HEX_SIZE, startPoint.x, startPoint.z);
+        if (row < 0 || row >= this._gridList.length || col < 0 || col >= this._col) {
+            console.log('超出范围');
+            return null;
+        }
         const index = this.getIndex(row, col);
         if (index < 0 || index >= this._gridList.length) return null;
         return this._gridList[index];

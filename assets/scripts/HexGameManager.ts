@@ -55,10 +55,10 @@ export class HexGameManager extends Component {
         // 设置数据
         Constant.hexManager.init();
 
-        this.hexGridManager.init(list, col, data.skinCount);
+        this.hexGridManager.init(list, col, data.skinCount, data.createSkinCount);
 
         // 设置拖拽
-        this.hexDragControl.init(data.skinCount);
+        this.hexDragControl.init(data.skinCount, data.createSkinCount);
     }
 }
 

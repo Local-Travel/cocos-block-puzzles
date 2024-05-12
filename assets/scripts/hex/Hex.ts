@@ -8,6 +8,8 @@ export class Hex extends Component {
     // 类型
     public hexType: string = '0';
 
+    private _originParent: any = null;
+
     start() {
 
     }
@@ -22,6 +24,16 @@ export class Hex extends Component {
 
     getPosition() {
         return this.node.position;
+    }
+
+    resetOriginParent() {
+        if (this._originParent == null) return false;
+        this.setParent(this._originParent);
+        return true;
+    }
+
+    setOriginParent(parent: any) {
+        this._originParent = parent;
     }
 
     setParent(parent: any) {
