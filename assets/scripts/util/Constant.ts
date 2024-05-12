@@ -4,6 +4,7 @@ import { AudioManager } from "../audio/AudioManager";
 import { GameManager } from "../GameManager";
 import { HexManager } from "../hex/HexManager";
 import { DialogManager } from "../dialog/DialogManager";
+import { HexGameManager } from "../HexGameManager";
 
 enum EVENT_TYPE {
   /** 减少拖拽的方块数量 */ 
@@ -12,6 +13,36 @@ enum EVENT_TYPE {
 
 /** 公共路径前缀 */
 const COMMON_PATH_PREFIX = 'texture/common/'
+
+// 六边形皮肤管理
+const HEX_SKIN_TYPE = {
+  Style1: {// 类型1
+     prefix: 'material/hex/style1/',
+     skin: 'hex-skin-',
+     skinNum: 3,
+  },
+}
+
+// 格子形皮肤管理
+const GRID_SKIN_TYPE = {
+  Style1: {// 类型1
+     prefix: 'material/grid/style1/',
+     skin: 'grid-skin-',
+     skinNum: 3,
+  },
+}
+
+/** 
+ * 格子皮肤属性
+ */
+enum GRID_SKIN_PROPS {
+  /** 默认 */
+  DEFAULT = 0,
+  /** 激活 */
+  ACTIVE = 1,
+  /** 视频 */
+  VEDIO = 2,
+}
 
 /** 
  * 道具名称
@@ -38,6 +69,7 @@ export class Constant {
   static hexManager: HexManager;
   static audioManager: AudioManager;
   static dialogManager: DialogManager;
+  static hexGameManager: HexGameManager;
   
   // game
 
@@ -50,6 +82,19 @@ export class Constant {
 
   // block
   static BLOCK_SIZE = 64; // 大小
+
+  // hex
+  static HEX_SIZE = 40; // 大小
+  static HEX_SIZE_Y_H = 2.5; // 大小
+  static HEX_SKIN_TYPE = HEX_SKIN_TYPE; // 皮肤类型
+
+  // hex-grid
+  static HEX_GRID_START_POINT = new Vec3(-100, 0, 30); // 网格起始点
+  static GRID_SKIN_TYPE = GRID_SKIN_TYPE; // 皮肤类型
+  static GRID_SKIN_PROPS = GRID_SKIN_PROPS; // 皮肤属性
+
+  // hex-drag
+  static HEX_DRAG_START_POINT = new Vec3(-60, 0, 150); // 网格起始点
 
   // props
   static PROPS_TYPE = PROPS_TYPE;// 道具类型

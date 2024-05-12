@@ -62,7 +62,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Sketchfab_model",
+    "_name": "model",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -109,7 +109,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "hex.stl.cleaner.materialmerger.gles",
+    "_name": "hex",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -156,7 +156,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Object_2",
+    "_name": "mesh",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {

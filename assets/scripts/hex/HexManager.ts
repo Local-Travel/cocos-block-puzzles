@@ -1,314 +1,145 @@
-import { _decorator, Component, Node, Graphics, macro, Vec3, math, CCInteger, UITransform, v3, Prefab, Intersection2D, Vec2, instantiate, Size, Color, EventTouch } from 'cc';
+import { _decorator, Component, Node, Graphics, macro, Vec3, math, CCInteger, UITransform, v3, Prefab, Intersection2D, Vec2, instantiate, Size, Color, EventTouch, resources, Material, MeshRenderer } from 'cc';
 import { Constant } from '../util/Constant';
 import { Utils } from '../util/Utils';
 import { Hex } from '../hex/Hex';
 import { HexDragControl } from './HexDragControl';
-import { HexDrag } from './HexDrag';
+import { HexGridManager } from './HexGridManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('HexManager')
 export class HexManager extends Component {
-    @property(Node)
-    boardNode: Node = null; // 棋盘节点
     @property(Prefab)
     hexPrefab: Prefab = null;
+    @property(HexGridManager)
+    hexGridManager: HexGridManager = null;
     @property(HexDragControl)
     hexDragControl: HexDragControl = null;
-    @property(CCInteger)
-    lineCount: number = 10; // 棋盘格子行列数
 
-    gridSize: number = 0; // 棋盘格子大小
-    startX: number = 0; // 棋盘起始坐标 X
-    startY: number = 0; // 棋盘起始坐标 Y
-
-    private _g: Graphics = null; // 绘制组件
-    private _gColor: Graphics = null; // 绘制颜色组件
-    private _uiTransform: UITransform = null;
-    private _blockPosList: any[] = [] // 每个点的位置
+    private _hexList: Hex[] = [];
+    private _hexSkinType: string = "";
 
     protected __preload(): void {
         Constant.hexManager = this;
     }
 
     onLoad() {
-        this._gColor = this.node.getChildByName('Color').getComponent(Graphics);
-        this._g = this.boardNode.getComponent(Graphics);
-        this._uiTransform = this.boardNode.getComponent(UITransform);
-        this.gridSize = this._uiTransform.width / this.lineCount;
-
-        this.drawChessBoard();
+        this._hexSkinType = 'Style1'
     }
 
     start() {
         
     }
 
-    init(list: number[]) {         
-        this.setBlockPosList(list);
+    init() {
+        // 由gird调用执行      
+        this.clearHexList();      
     }
 
-    /** 绘制格子 */
-    drawChessBoard() {
-        // 绘制线条
-        // this._g.strokeColor = new Color().fromHEX('#69DBFF');
-        this._g.lineCap = Graphics.LineCap.ROUND;
-        this._g.lineJoin = Graphics.LineJoin.ROUND;
-
-        this.startX = -this.gridSize * this.lineCount / 2; // 棋盘起始坐标 X
-        this.startY = -this.gridSize * this.lineCount / 2; // 棋盘起始坐标 Y
-
-        // 绘制横线
-        for (let i = 0; i <= this.lineCount; i++) {
-            const y = this.startY + i * this.gridSize;
-            const x = this.startX + this.lineCount * this.gridSize;
-            this._g.moveTo(this.startX, y);
-            this._g.lineTo(x, y);
-            this._g.stroke();
-        }
-
-        // 绘制竖线
-        for (let j = 0; j <= this.lineCount; j++) {
-            const x = this.startX + j * this.gridSize;
-            const y = this.startY + this.lineCount * this.gridSize;
-            this._g.moveTo(x, this.startY);
-            this._g.lineTo(x, y);
-            this._g.stroke();
-        }
-
-        for(let i = 0; i < this.lineCount; i++){
-            for(let j = 0; j < this.lineCount; j++){
-                // const x = this.startX + j * this.gridSize + this.gridSize / 2;
-                // const y = this.startY + i * this.gridSize + this.gridSize / 2;
-                const pos = Utils.convertRowColToPos(i, j, this.gridSize, this.startX, this.startY);
-                this._blockPosList.push([pos, 0, null]);
-            }
-        }
-        // console.log(this._blockPosList[0])
-        // console.log(this._blockPosList[9])
-        // console.log(this._blockPosList[90])
-        // console.log(this._blockPosList[99])
-        // const posArr = [this._blockPosList[0][0], this._blockPosList[9][0], this._blockPosList[90][0], this._blockPosList[99][0]]
-        // this.drawRectColor(posArr);
-        // this.removeRectColor();
-
-        // const list = []
-        // for(let i = 0; i < this._blockPosList.length; i++) {
-        //     const pos = this._blockPosList[i][0];
-        //     list.push(pos);
-        // }
-        // this.drawRectColor(list);
-    }
-
-    /** 设置格子内容 */
-    setBlockPosList(list: number[]) {
-        const size = new Size(this.gridSize, this.gridSize);
-        for(let i = 0; i < this._blockPosList.length; i++) {
-            const pos = this._blockPosList[i][0];
-            if (list[i] > 0) {
-                const hexNode = instantiate(this.hexPrefab);
-                hexNode.getComponent(UITransform).setContentSize(size);
-                hexNode.setPosition(pos);
-                hexNode.parent = this.boardNode;
-
-                this.setGridPosVal(i, 1, hexNode);
-            }
-        }
-    }
-
-    setGridPosVal(index: number, fill: number, bNode: Node) {
-        if (!this._blockPosList.length || index < 0 || index >= this._blockPosList.length) {
-            return;
-        }
-        this._blockPosList[index][1] = fill;
-        this._blockPosList[index][2] = bNode;
-    }
-
-    getGridPosVal(index: number) {
-        if (!this._blockPosList.length || index < 0 || index >= this._blockPosList.length) {
-            return null;
-        }
-        return this._blockPosList[index].slice();
-    }
-
-    fillColor(pos: Vec3, color: math.Color) {
-        const x = pos.x - this.gridSize / 2 + 3;
-        const y = pos.y - this.gridSize / 2 + 3;
-        this._gColor.fillColor = color;
-        this._gColor.fillRect(x, y, this.gridSize - 6, this.gridSize - 6);
-        this._gColor.fill();
-    }
-
-    fillColorList(posList: Vec3[], color: math.Color) {
-        for (let i = 0; i < posList.length; i++) {
-            this.fillColor(posList[i], color);
-        }
-    }
-
-    drawRectColor(posList: Vec3[]) {
-        this.fillColorList(posList, new Color().fromHEX('#2debff'));
-    }
-
-    removeRectColor() {
-        this._gColor.clear();
-    }
-
-    getIndex(row: number, col: number) {
-        return row * this.lineCount + col;
-    }
-
-    /** 检查拖拽方块是否可以塞入空板中 */
-    checkDragPosition(posList: Vec3[], dragPos: Vec3): boolean | [Vec3, number[]]{
-        this.removeRectColor();
-        let offset = new Vec3(0, 0, 0);
-        let newPos = new Vec3(0, 0, 0);
-        const rowColList = [];
-        const newBlockPosList = [];
-        const d = dragPos.clone();
-        // console.log('=====================')
-        // console.log('posList', posList, dragPos)
-        for (let i = 0; i < posList.length; i++) {
-            const p = posList[i].clone();
-            newPos = new Vec3(0, 0, 0);
-            Vec2.add(newPos, p, d);
-            // console.log('newPos', newPos, p);
-            // Vec2.subtract(offset, p, newPos);
-
-            const [row, col] = Utils.convertPosToRowCol(newPos, this.gridSize, this.startX, this.startY)
-            const index = this.getIndex(row, col);
-            const gridPos = this.getGridPosVal(index);
-            console.log('gridPos', gridPos);
-            // console.log('row', row, col)
-            if (row < 0 || row >= this.lineCount || col < 0 || col >= this.lineCount) {
-                console.log('超出大盘范围')
-                return false;
-            }
-            if (!gridPos) {
-                console.log('不存在该位置')
-                return false;
-            }
-            if (gridPos[1] === 1) {
-                console.log('该位置已经有方块')
-                return false;
-            }
-            const pos = gridPos[0].clone();
-            newBlockPosList.push(pos);
-            rowColList.push([row, col]);
-
-            if (i === 0) {
-                Vec2.subtract(offset, pos, newPos)
-            }
-        }
-        // console.log(newBlockPosList);
-
-        this.drawRectColor(newBlockPosList);
-        // console.log('offset', offset)
-
-        return [offset, rowColList];
-    }
-
-    /** 塞入空板中 */
-    setFillPositionByIndex(rowColList: number[], blockList: Node[]) {
-        for (let i = 0; i < rowColList.length; i++) {
-            const index = this.getIndex(rowColList[i][0], rowColList[i][1]);
-            // this._blockPosList[index][1] = 1;
-            // this._blockPosList[index][2] = blockList[i];
-            this.setGridPosVal(index, 1, blockList[i]);
-        }
-    }
-
-    /** 检查横向纵向是否满了，并销毁 */
-    checkBoardFull(rowColList: number[]) {
-        const rowList = [];
-        const colList = [];
-
-        // 横向检查
-        for (let k = 0; k < rowColList.length; k++) {
-            const row = rowColList[k][0];
-            const indexList = [];
-            let j = 0;
-            for(j = 0; j < this.lineCount; j++) {
-                const index = this.getIndex(row, j);
-                const gridPos = this.getGridPosVal(index);
-                if (!gridPos || gridPos[1] === 0) {
-                    break
+    /** 批量生成多个指定位置的hex */
+    generatePreHexList(list: number[], col: number) {
+        const startPoint = Constant.HEX_GRID_START_POINT;
+        const hexSize = Constant.HEX_SIZE;
+        const row = Math.ceil(list.length / col);
+        // 先清空所有hex
+        this.clearHexList();
+        for(let i = 0; i < row; i++){
+            for(let j = 0; j < col; j++){
+                const k = i * col + j;
+                if (list[k] > 0) {
+                    const pos = Utils.convertRowColToPosHexagon(i, j, hexSize, startPoint.x, startPoint.z);
+                    this.batchGenerateHexList(list[k], pos);
                 }
-                indexList.push(index)
-            }
-            if (j >= this.lineCount) {
-                rowList.push(indexList);
-            }
-        }
-
-        // 纵向检查
-        for (let k = 0; k < rowColList.length; k++) {
-            const col = rowColList[k][1];
-            const indexList = [];
-            let i = 0;
-            for(i = 0; i < this.lineCount; i++) {
-                const index = this.getIndex(i, col);
-                const gridPos = this.getGridPosVal(index);
-                if (!gridPos || gridPos[1] === 0) {
-                    break
-                }
-                indexList.push(index)
-            }
-            if (i >= this.lineCount) {
-                colList.push(indexList);
-            }
-        }
-
-        // 销毁横向
-        this.removeBlock(rowList);
-
-        // 销毁纵向
-        this.removeBlock(colList);
-
-        this.removeInvalidDragNode();
-
-        // effect
-        if (rowList.length || colList.length) {
-            Constant.audioManager.play('erase');
-        }
-    }
-
-    removeBlock(list: number[][]) {
-        for(let i = 0; i < list.length; i++) {
-            const indexList = list[i];
-            for(let j = 0; j < indexList.length; j++) {
-                const index = indexList[j];
-                const gridPos = this.getGridPosVal(index);
-                if (!gridPos) continue;
-                const hexNode = gridPos[2];
-                if (hexNode) {
-                    hexNode.getComponent(Hex).eraseNode()
-                }
-                this.setGridPosVal(index, 0, null);
             }
         }
     }
 
-    removeInvalidDragNode() {
-        // 清除无用的节点
-        const children = this.boardNode.children
-        for(let i = 0; i < children.length; i++) {
-            const child = children[i];
-            if (child.name === 'dragNode' && child.children.length === 0) {
-                child.destroy();
+    /** 生成单个六边形 */
+    createHex(pos: Vec3, hexType: number) {
+        const [path, name] = this.getHexType(hexType);
+        const hexNode = instantiate(this.hexPrefab);
+        hexNode.setPosition(pos);
+        hexNode.setParent(this.node);
+        this.setMaterial(hexNode, path);
+
+        const hexComp = hexNode.getComponent(Hex);
+        hexComp.setHexType(name);
+
+        this._hexList.push(hexComp);
+
+        return hexComp;
+    }
+
+    batchGenerateHexList(count: number, pos: Vec3, hexTypeList: number[] = [], skinLimitCount: number = 0) {
+        const hexList: Hex[] = []
+        let num = count, skinList = [];
+        let len = hexTypeList.length;
+        if (len > 0) {
+            skinList = hexTypeList;
+        } else {
+            skinList = this.getSkinList(0, skinLimitCount);
+        }
+        len = skinList.length;
+        let index = 0;
+        for(let i = 0; i < len; i++) {
+            const max = Math.floor(num / (len - i));
+            const n = i !== len - 1 ? math.randomRangeInt(1, max + 1) : num;
+            num -= n;
+            for(let j = 0; j < n; j++) {
+                const newPos = pos.clone();
+                newPos.y = Utils.getListHexYH(index++);
+                const hex = this.createHex(newPos, skinList[i]);
+                hexList.push(hex);
             }
+        }
+        return hexList
+    }
+
+    getSkinList(count: number = 0, skinLimit: number = 0) {
+        const skinObj = Constant.HEX_SKIN_TYPE[this._hexSkinType]
+        let skinMaxCount = skinObj.skinNum;
+        if (skinLimit > 0) {
+            skinMaxCount = Math.min(skinMaxCount, skinLimit);
+        }
+        const skinCount = count > 0 ? count : math.randomRangeInt(1, skinMaxCount + 1);
+        const skinList = []
+        for(let i = 0; i < skinCount; i++) {
+            const code = math.randomRangeInt(1, 100)
+            skinList.push(code)
+        }
+        return skinList;
+    }
+
+    getHexType(hexType: number) {
+        const skinObj = Constant.HEX_SKIN_TYPE[this._hexSkinType]
+        let code = hexType % skinObj.skinNum
+        code = code == 0 ? skinObj.skinNum : code
+        const name = skinObj.skin + code
+        const path = skinObj.prefix + name
+        return [path, name]
+    }
+
+    setMaterial(node: Node, path: string) {
+        const meshNode = node ? node.children[0]!.children[0]!.children[0] : null
+        if (meshNode) {
+            resources.load(path, Material, (err, material) => {
+                meshNode.getComponent(MeshRenderer).material = material;
+            });
         }
     }
 
-    handleTouchStart(event: EventTouch, drag: HexDrag) {
-        this.hexDragControl && this.hexDragControl.handleTouchStart(event, drag);
+    getHexList() {
+        return this._hexList;
     }
 
-    handleTouchMove(event: EventTouch, drag: HexDrag) {
-        this.hexDragControl && this.hexDragControl.handleTouchMove(event, drag);
+    clearHexList() {
+        this._hexList.forEach(item => {
+            if (item && item.node) {
+                item.node.destroy();
+            }
+        });
+        this._hexList = [];
     }
-
-    handleTouchEnd(event: EventTouch, drag: HexDrag) {
-        this.hexDragControl && this.hexDragControl.handleTouchEnd(event, drag);
-    }
+    
 }
 
 

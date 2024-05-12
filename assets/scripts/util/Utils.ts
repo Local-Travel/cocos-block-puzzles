@@ -1,4 +1,5 @@
 import { Color, Graphics, Vec2, Vec3, _decorator, math, sys } from 'cc';
+import { Constant } from './Constant';
 
 export class Utils {
     /** 根据行列转换位置 */
@@ -21,16 +22,23 @@ export class Utils {
         const h = 1 / 2 * radius * Math.sqrt(3);
         const x = startX + radius + col * 1.5 * radius;
         const y = startY - (h + col % 2 * h + row * 2 * h);
-        return new Vec3(x, y, 0);
+        return new Vec3(x, 0, y);
     }
 
     /** 根据位置转换行列-六边形，左上角起始点 */
     static convertPosToRowColHexagon(pos: Vec3, size: number, startX: number, startY: number): number[] {
         const radius = size / 2;
         const h = 1 / 2 * radius * Math.sqrt(3);
-        const col = Math.round((pos.x - startX - radius) / (1.5 * radius));
-        const row = Math.round((startY - pos.y - col % 2 * h - h) / ( 2 * h));
+        const x = pos.x;
+        const y = pos.z;
+        const col = Math.round((x - startX - radius) / (1.5 * radius));
+        const row = Math.round((startY - y - col % 2 * h - h) / ( 2 * h));
         return [row, col];
+    }
+
+    /** hex在3d数组中的高度 */
+    static getListHexYH(index: number) {
+        return Constant.HEX_SIZE_Y_H * index;
     }
 
     /** 是否超出边界 */

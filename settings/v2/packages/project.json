@@ -5,5 +5,28 @@
       "width": 720,
       "height": 1280
     }
+  },
+  "physics": {
+    "collisionGroups": [
+      {
+        "index": 2,
+        "name": "grid"
+      },
+      {
+        "index": 3,
+        "name": "hexDrag"
+      },
+      {
+        "index": 4,
+        "name": "wall"
+      }
+    ],
+    "collisionMatrix": {
+      "0": 1,
+      "1": 4,
+      "2": 10,
+      "3": 20,
+      "4": 8
+    }
   }
 }

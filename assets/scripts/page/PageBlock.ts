@@ -5,7 +5,7 @@ const { ccclass, property } = _decorator;
 @ccclass('PageBlock')
 export class PageBlock extends Component {
     start() {
-        this.init();
+
     }
 
     update(deltaTime: number) {
@@ -13,8 +13,7 @@ export class PageBlock extends Component {
     }
 
     init() {
-        // 设置方块数据
-        Constant.gameManager.init();
+        // 设置页面数据
     }
 }
 

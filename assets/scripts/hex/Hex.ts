@@ -1,4 +1,4 @@
-import { _decorator, Component, tween, v3 } from 'cc';
+import { _decorator, Component, tween, v3, Vec3 } from 'cc';
 import { Constant } from '../util/Constant';
 const { ccclass, property } = _decorator;
 
@@ -6,7 +6,7 @@ const { ccclass, property } = _decorator;
 export class Hex extends Component {
 
     // 类型
-    public blockType: number = 0;
+    public hexType: string = '0';
 
     start() {
 
@@ -16,15 +16,23 @@ export class Hex extends Component {
         
     }
 
-    setDataProp(blockType: number = 0) {
-        this.blockType = blockType;
+    setPosition(pos: Vec3) {
+        this.node.setPosition(pos);
+    }
+
+    getPosition() {
+        return this.node.position;
+    }
+
+    setParent(parent: any) {
+        this.node.setParent(parent);
+    }
+
+    setHexType(hexType: string) {
+        this.hexType = hexType;
     }
 
     eraseNode() {
-        if (this.blockType) {
-            return
-        }
-        
         tween(this.node).to(0.3, { scale: v3(0, 0, 0) }).call(() => {            
             this.node.destroy();
         }).start();

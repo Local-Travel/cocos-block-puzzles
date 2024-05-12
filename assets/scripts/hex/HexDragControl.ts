@@ -1,162 +1,181 @@
-import { _decorator, CCInteger, Component, director, EventTouch, instantiate, Node, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCInteger, Component, director, EventTouch, geometry, input, Input, instantiate, math, Node, PhysicsSystem, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
 import { BlockData } from '../data/BlockData';
 import { Constant } from '../util/Constant';
 import { HexDrag } from './HexDrag';
+import { Utils } from '../util/Utils';
+import { HexGridManager } from './HexGridManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('HexDragControl')
 export class HexDragControl extends Component {
     @property(Prefab)
     dragNodePrefab: Prefab = null!;
-    @property(Prefab)
-    hexPrefab: Prefab = null!;
-    @property(Node)
-    target: Node = null!;
+
+    @property({ type: Camera })
+    camera: Camera = null!;
 
     @property({ type: CCInteger })
     blockCount: number = 3;
 
+    @property(HexGridManager)
+    hexGridManager: HexGridManager = null!;
+
     private _blockNum: number = 0;
-    private _targetRect: Rect = null;
-    private _rPos: Vec3 = null;
-    private _startPos: Vec3 = null;
+    private _hexSkinCountLimit: number = 0;
 
-    private _dragReuslt: boolean | [Vec3, number[]] = false;
+    private _moveDrag: HexDrag = null;
 
-    protected onLoad(): void {
-        this._blockNum = this.blockCount;
-        if (this.target) {
-            this._targetRect = this.target.getComponent(UITransform).getBoundingBox();
-        }
+    protected onEnable(): void {
+        input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+        input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+    }
 
-        director.on(Constant.EVENT_TYPE.SUB_DRAG_BLOCK, this.substractCount, this)
+    protected onDisable(): void {
+        input.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
+        input.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        input.off(Input.EventType.TOUCH_MOVE, this.onTouchEnd, this);
     }
 
     start() {
-        this.generateBlocks();
+        
     }
 
     update(deltaTime: number) {
         
     }
 
+    init(skinCount: number) {
+        this._hexSkinCountLimit = skinCount;
+        this._blockNum = this.blockCount;
+        this.generateDragList();
+    }
+
     substractCount() {
         this._blockNum--;
         if (this._blockNum <= 0) {
             this._blockNum = this.blockCount;
-            this.generateBlocks();
+            this.generateDragList();
         }
     }
 
-    generateBlocks() {
-        const size = Constant.hexManager.gridSize;
-        const blockSize = new Size(size, size);
+    generateDragList() {
+        const hexCount = math.randomRangeInt(1, this.hexGridManager.maxHexCount);
+        const hexSkinList = [];
+        this.generateDragHexs(hexCount, hexSkinList);
+    }
+
+    generateDragHexs(hexCount: number, hexSkinList: number[]) {
+        const startPoint = Constant.HEX_DRAG_START_POINT;
+
+        for(let j = 0; j < this.blockCount; j++){
+            const space = Math.abs(startPoint.x);
+            const pos = new Vec3(startPoint.x + space * j, startPoint.y, startPoint.z);
+            const hexDrag = this.generateDrag(pos);
+            
+            const hexList = Constant.hexManager.batchGenerateHexList(hexCount, pos, hexSkinList, this._hexSkinCountLimit);
+            hexDrag.setHexList(hexList);
+
+            hexList.forEach((hex) => {
+                hex.setPosition(new Vec3(0, hex.getPosition().y, 0));
+                hex.setParent(hexDrag.node);
+            });
+
+            // console.log('generateDragHexs', hexDrag);
+        }
+    }
+
+    /** 生成格子 */
+    generateDrag(pos: Vec3) {
+        const dragNode = instantiate(this.dragNodePrefab);
+        dragNode.setPosition(pos);
+        dragNode.setParent(this.node);
+        dragNode.active = true;
         
-        const startX = -200;
-        for(let k = 0; k < this._blockNum; k++) {
-            const dragNode = instantiate(this.dragNodePrefab);
-            dragNode.setPosition(v3(startX + k * 200, 0, 0));
-            dragNode.setParent(this.node);
-
-            const styleList = BlockData.getBlockStyle();
-            const posList = [];
-            const blockList = [];
-
-            // console.log(styleList);
-
-            const len = styleList.length
-            const xLen = len ? styleList[0].length : 0;
-            const yStart = -len / 2 * size - size / 2;
-            const xStart = -xLen / 2 * size + size / 2;
-            for (let i = 0; i < len; i++) {
-                for(let j = 0; j < xLen; j++) {
-                    const block = styleList[i][j];
-                    if (block) {
-                        const hexNode = instantiate(this.hexPrefab);
-                        hexNode.getComponent(UITransform).setContentSize(blockSize); 
-                        
-                        const y = yStart + (len - i) * size;
-                        const x = xStart + j * size;
-                        const pos = v3(x, y, 0);
-    
-                        hexNode.setPosition(pos);
-                        hexNode.setParent(dragNode);
-
-                        posList.push(pos);
-                        blockList.push(hexNode);
-                    }
-                }
-            }
-            dragNode.getComponent(UITransform).setContentSize(new Size(xLen * size, len * size));
-            const hexDrag = dragNode.getComponent(HexDrag);
-            hexDrag.setBlockList(blockList);
-            hexDrag.setBlockPosList(posList);
-            hexDrag.setScale(0.5, 0.5);
-        }
+        const hexDragComp = dragNode.getComponent(HexDrag);
+        return hexDragComp;
     }
 
-    handleTouchStart(event: EventTouch, drag: HexDrag) {
-        this._startPos = drag.getPosition();
+    onTouchStart(event: EventTouch) {
+        // this._startPos = drag.getPosition();
+        this._moveDrag = null;
     }
 
-    handleTouchMove(event: EventTouch, drag: HexDrag) {
-        if (!this._targetRect) return;
-        const touchPos = event.getLocation();
-        const nPos = drag.getNodeSpacePosition(touchPos);
+    onTouchMove(event: EventTouch) {
+        const res: any = this.checkTouchGrid(event);
+        if (!res) return;
+        console.log('checkTouchGrid', res);
+        const [hitPoint, hitNode] = res;
+        const newPos = new Vec3(hitPoint.x, 0, hitPoint.z);
+        this._moveDrag = hitNode.getComponent(HexDrag);
+        this._moveDrag.setPosition(newPos);
+        // // TODO: 判断撞击网格回掉
 
-        const rPos = drag.getRelativePosition(new Vec2(nPos.x, nPos.y));
-        const { x, y, width, height } = this._targetRect;
-        const size = Constant.hexManager.gridSize;
+        // const nPos = drag.getNodeSpacePosition(touchPos);
 
-        if (rPos.x < x + size / 2 
-            || rPos.x > x + width - size / 2 
-            || rPos.y > y + height - size / 2
-            || nPos.y < 0) {
-            console.log('超出范围');
-            return;
-        }
+        // const rPos = drag.getRelativePosition(new Vec2(nPos.x, nPos.y));
+        // const { x, y, width, height } = this._targetRect;
+        // const size = Constant.hexManager.gridSize;
 
-        drag.setPosition(nPos);
+        // if (rPos.x < x + size / 2 
+        //     || rPos.x > x + width - size / 2 
+        //     || rPos.y > y + height - size / 2
+        //     || nPos.y < 0) {
+        //     console.log('超出范围');
+        //     return;
+        // }
 
-        console.log('targetRect', this._targetRect, rPos, nPos);
-        if (this._targetRect.contains(v2(rPos.x, rPos.y))) {
-            drag.setScale(1, 1);
-            this._dragReuslt = Constant.hexManager.checkDragPosition(drag.getBlockPosList(), v3(rPos.x, rPos.y));
-            this._rPos = v3(rPos.x, rPos.y, 0);
-        } else {
-            drag.setScale(0.5, 0.5);
-            this._dragReuslt = false;
-            this._rPos = null;
-            Constant.hexManager.removeRectColor();
-        }
+        // drag.setPosition(nPos);
+
+        // console.log('targetRect', this._targetRect, rPos, nPos);
+        // if (this._targetRect.contains(v2(rPos.x, rPos.y))) {
+        //     drag.setScale(1, 1);
+        //     this._dragReuslt = Constant.hexManager.checkDragPosition(drag.getBlockPosList(), v3(rPos.x, rPos.y));
+        //     this._rPos = v3(rPos.x, rPos.y, 0);
+        // } else {
+        //     drag.setScale(0.5, 0.5);
+        //     this._dragReuslt = false;
+        //     this._rPos = null;
+        //     Constant.hexManager.removeRectColor();
+        // }
     }
 
-    handleTouchEnd(event: EventTouch, drag: HexDrag) {
-        if (this._dragReuslt) {
-            const offset = this._dragReuslt[0];
-            const rowColList = this._dragReuslt[1];
-            const newPos = new Vec3(this._rPos.x + offset.x, this._rPos.y + offset.y, 0);
-            drag.setPosition(newPos);
-
-            Constant.hexManager.setFillPositionByIndex(rowColList, drag.getBlockList());
-            Constant.hexManager.checkBoardFull(rowColList);
-            Constant.hexManager.removeRectColor();
-
-            drag.setParent(this.target);
-            drag.setDragAbled(false);
-            // 减少拖拽的方块数量
-            director.emit(Constant.EVENT_TYPE.SUB_DRAG_BLOCK);
-
-            // effect
-            Constant.audioManager.play('water2');
+    onTouchEnd(event: EventTouch) {
+        const res: any = this.checkTouchGrid(event);
+        if (res) {
+            // TODO
+            // this.substractCount();
         } else {
             console.log('恢复原来位置');
-            // 恢复初始位置
-            drag.resetOriginPosition();
-            drag.setScale(0.5, 0.5);
-            drag.setDragAbled(true);
-            this._dragReuslt = false;
+            this._moveDrag?.resetOriginPosition();
         }
+    }
+
+    checkTouchGrid(event: EventTouch) {
+        const outRay = new geometry.Ray()
+        this.camera.screenPointToRay(event.getLocationX(), event.getLocationY(), outRay)
+        // if (PhysicsSystem.instance.raycast(outRay)) {
+        //     console.log('PhysicsSystem.instance.raycastResults', PhysicsSystem.instance.raycastResults)
+        // } else {
+        //     console.log('未检测射线222')
+        // }
+
+        let ray = this.camera.screenPointToRay(event.getLocationX(), event.getLocationY())
+
+        if (PhysicsSystem.instance.raycastClosest(ray)) {
+            const res = PhysicsSystem.instance.raycastClosestResult
+            const hitNode = res.collider.node
+            console.log('hitNode', hitNode)
+            if (hitNode.name.startsWith('hexDragNode')) {
+                console.log('击中目标')
+                // hitPoint
+                const hitPoint: Vec3 = res.hitPoint;
+                return [hitPoint, hitNode];
+            }
+        } else {
+            console.log('射线不包含')
+        }
+        return null;
     }
 }
 
