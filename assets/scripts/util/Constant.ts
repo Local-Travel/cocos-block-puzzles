@@ -1,10 +1,11 @@
-import { _decorator, sys, Vec3 } from "cc";
+import { _decorator, Enum, sys, Vec3 } from "cc";
 import { BlockManager } from "../block/BlockManager";
 import { AudioManager } from "../audio/AudioManager";
 import { GameManager } from "../GameManager";
 import { HexManager } from "../hex/HexManager";
 import { DialogManager } from "../dialog/DialogManager";
 import { HexGameManager } from "../HexGameManager";
+import { HexGridManager } from "../hex/HexGridManager";
 
 enum EVENT_TYPE {
   /** 减少拖拽的方块数量 */ 
@@ -44,6 +45,18 @@ enum GRID_SKIN_PROPS {
   VEDIO = 2,
 }
 
+/** 碰撞类型 */
+enum CollisionType {
+  /** 格子组件 */
+  GRID_NAME = 'grid',
+  /** 拖动组件 */
+  DRAG_NAME = 'hexDragNode',
+  /** 格子组件 */
+  GRID_TYPE = 2,
+  /** 拖动组件 */
+  DRAG_TYPE = 3,
+}
+
 /** 
  * 道具名称
  */
@@ -67,9 +80,11 @@ export class Constant {
   static gameManager: GameManager;
   static blockManager: BlockManager;
   static hexManager: HexManager;
+  static hexGridManager: HexGridManager;
   static audioManager: AudioManager;
   static dialogManager: DialogManager;
   static hexGameManager: HexGameManager;
+  
   
   // game
 
@@ -89,12 +104,13 @@ export class Constant {
   static HEX_SKIN_TYPE = HEX_SKIN_TYPE; // 皮肤类型
 
   // hex-grid
-  static HEX_GRID_START_POINT = new Vec3(-100, 0, 30); // 网格起始点
+  static HEX_GRID_START_POINT = new Vec3(-80, 0, 40); // 网格起始点
   static GRID_SKIN_TYPE = GRID_SKIN_TYPE; // 皮肤类型
   static GRID_SKIN_PROPS = GRID_SKIN_PROPS; // 皮肤属性
 
   // hex-drag
   static HEX_DRAG_START_POINT = new Vec3(-60, 0, 150); // 网格起始点
+  static CollisionType = CollisionType; // 碰撞类型
 
   // props
   static PROPS_TYPE = PROPS_TYPE;// 道具类型

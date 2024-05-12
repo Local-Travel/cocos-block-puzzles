@@ -14,11 +14,7 @@
       },
       {
         "index": 3,
-        "name": "hexDrag"
-      },
-      {
-        "index": 4,
-        "name": "wall"
+        "name": "hexDragNode"
       }
     ],
     "collisionMatrix": {

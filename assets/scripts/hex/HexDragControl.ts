@@ -1,9 +1,10 @@
-import { _decorator, Camera, CCInteger, Component, director, EventTouch, geometry, input, Input, instantiate, math, Node, PhysicsSystem, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCInteger, Collider, Component, director, EventTouch, geometry, input, Input, instantiate, ITriggerEvent, math, Node, PhysicsSystem, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
 import { BlockData } from '../data/BlockData';
 import { Constant } from '../util/Constant';
 import { HexDrag } from './HexDrag';
 import { Utils } from '../util/Utils';
 import { HexGridManager } from './HexGridManager';
+import { HexGrid } from './HexGrid';
 const { ccclass, property } = _decorator;
 
 @ccclass('HexDragControl')
@@ -24,6 +25,8 @@ export class HexDragControl extends Component {
     private _hexSkinCountLimit: number = 0;
 
     private _moveDrag: HexDrag = null;
+    private _lastHexGrid: HexGrid = null;
+    private _dragReuslt: null | [Vec3, Node] = null;
 
     protected onEnable(): void {
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
@@ -96,19 +99,54 @@ export class HexDragControl extends Component {
         return hexDragComp;
     }
 
+    removeHexGridSkin() {
+        if (this._lastHexGrid) {
+            Constant.hexGridManager.setGridSkin(0, this._lastHexGrid);
+        }
+    }
+
+    setHexGridSkin(hexGrid: HexGrid) {
+        if (!hexGrid) return;
+        if (this._lastHexGrid) {
+            if (this._lastHexGrid.uuid === hexGrid.uuid) return;
+            this.removeHexGridSkin();
+        }
+        Constant.hexGridManager.setGridSkin(1, hexGrid);
+    }
+
     onTouchStart(event: EventTouch) {
         // this._startPos = drag.getPosition();
         this._moveDrag = null;
     }
 
     onTouchMove(event: EventTouch) {
-        const res: any = this.checkTouchGrid(event);
-        if (!res) return;
-        console.log('checkTouchGrid', res);
-        const [hitPoint, hitNode] = res;
-        const newPos = new Vec3(hitPoint.x, 0, hitPoint.z);
-        this._moveDrag = hitNode.getComponent(HexDrag);
-        this._moveDrag.setPosition(newPos);
+        let ray = this.camera.screenPointToRay(event.getLocationX(), event.getLocationY())
+
+        if (PhysicsSystem.instance.raycastClosest(ray)) {
+            const res = PhysicsSystem.instance.raycastClosestResult
+            const hitNode = res.collider.node
+            // console.log('hitNode', hitNode)
+            if (hitNode.name.startsWith(Constant.CollisionType.DRAG_NAME)) {
+                console.log('击中目标')
+                // hitPoint
+                const hitPoint: Vec3 = res.hitPoint;
+                const drag = hitNode.getComponent(HexDrag);
+                drag.setPosition(new Vec3(hitPoint.x, 0, hitPoint.z));
+                const hexGrid = Constant.hexGridManager.getGridByPos(hitPoint);
+                console.log('hitPoint, hexGrid', hitPoint, hexGrid);
+                this.setHexGridSkin(hexGrid);
+                this._lastHexGrid = hexGrid;
+                this._dragReuslt = [hitPoint, hitNode];
+                this._moveDrag = drag;
+            } else {
+                this.removeHexGridSkin();
+            }
+        } else {
+            console.log('射线不包含')
+            this._dragReuslt = null;
+            this.removeHexGridSkin();
+        }
+
         // // TODO: 判断撞击网格回掉
 
         // const nPos = drag.getNodeSpacePosition(touchPos);
@@ -141,41 +179,15 @@ export class HexDragControl extends Component {
     }
 
     onTouchEnd(event: EventTouch) {
-        const res: any = this.checkTouchGrid(event);
-        if (res) {
+        console.log('this._lastHexGrid', this._lastHexGrid)
+        if (this._dragReuslt && this._lastHexGrid) {
             // TODO
             // this.substractCount();
+            this.removeHexGridSkin();
         } else {
             console.log('恢复原来位置');
             this._moveDrag?.resetOriginPosition();
         }
-    }
-
-    checkTouchGrid(event: EventTouch) {
-        const outRay = new geometry.Ray()
-        this.camera.screenPointToRay(event.getLocationX(), event.getLocationY(), outRay)
-        // if (PhysicsSystem.instance.raycast(outRay)) {
-        //     console.log('PhysicsSystem.instance.raycastResults', PhysicsSystem.instance.raycastResults)
-        // } else {
-        //     console.log('未检测射线222')
-        // }
-
-        let ray = this.camera.screenPointToRay(event.getLocationX(), event.getLocationY())
-
-        if (PhysicsSystem.instance.raycastClosest(ray)) {
-            const res = PhysicsSystem.instance.raycastClosestResult
-            const hitNode = res.collider.node
-            console.log('hitNode', hitNode)
-            if (hitNode.name.startsWith('hexDragNode')) {
-                console.log('击中目标')
-                // hitPoint
-                const hitPoint: Vec3 = res.hitPoint;
-                return [hitPoint, hitNode];
-            }
-        } else {
-            console.log('射线不包含')
-        }
-        return null;
     }
 }
 

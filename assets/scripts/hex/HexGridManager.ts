@@ -15,6 +15,11 @@ export class HexGridManager extends Component {
     private _gridList: HexGrid[] = [];
     private _gridSkinType: string = "Style1";// 格子皮肤类型
     private _hexSkinCountLimit: number = 0;// 皮肤数量限制
+    private _col = 0;// 列数
+
+    protected __preload(): void {
+        Constant.hexGridManager = this;
+    }
     
     start() {
 
@@ -26,6 +31,7 @@ export class HexGridManager extends Component {
 
     init(list: number[], col: number, skinCount: number) {
         this._hexSkinCountLimit = skinCount;
+        this._col = col;
         this.draw3DHexGrid(list, col);
     }
 
@@ -38,7 +44,7 @@ export class HexGridManager extends Component {
         this.clearGridList();
         for(let i = 0; i < row; i++){
             for(let j = 0; j < col; j++){
-                const k = i * col + j;
+                const k = this.getIndex(i, j);
                 const pos = Utils.convertRowColToPosHexagon(i, j, gridSize, startPoint.x, startPoint.z);
                 const hexGrid = this.generateGrid(pos);
                 this._gridList.push(hexGrid);
@@ -86,6 +92,18 @@ export class HexGridManager extends Component {
     setGridSkin(skinType: number, hexGrid: HexGrid) {
         const [path, name] = this.getSkinType(skinType);
         this.setMaterial(hexGrid.node, path);
+    }
+
+    getGridByPos(pos: Vec3) {
+        const startPoint = Constant.HEX_GRID_START_POINT;
+        const [row, col] = Utils.convertPosToRowColHexagon(pos, Constant.HEX_SIZE, startPoint.x, startPoint.z);
+        const index = this.getIndex(row, col);
+        if (index < 0 || index >= this._gridList.length) return null;
+        return this._gridList[index];
+    }
+
+    getIndex(row: number, col: number) {
+        return row * this._col + col;
     }
 
     getGridList() {

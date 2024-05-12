@@ -52,5 +52,9 @@ export class HexDrag extends Component {
     setHexList(hexList: any[]) {
         this.hexList = hexList;
     }
+
+    getHexList() {
+        return this.hexList;
+    }
 }
 

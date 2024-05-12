@@ -1606,7 +1606,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 19,
       "z": 150
     },
     "_lrot": {
@@ -4404,7 +4404,7 @@
     "_enabled": true,
     "__prefab": null,
     "_group": 8,
-    "_type": 2,
+    "_type": 4,
     "_mass": 1,
     "_allowSleep": true,
     "_linearDamping": 0.1,
@@ -4439,13 +4439,13 @@
     "_center": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 10,
       "z": 0
     },
     "_size": {
       "__type__": "cc.Vec3",
       "x": 37,
-      "y": 25,
+      "y": 15,
       "z": 32
     },
     "_id": "3eCja3WT1D3asYkHInvPbk"
