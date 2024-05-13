@@ -15,12 +15,12 @@ export class HexDragControl extends Component {
     camera: Camera = null!;
 
     @property({ type: CCInteger })
-    blockCount: number = 3;
+    dragCount: number = 3;
 
     @property(HexGridManager)
     hexGridManager: HexGridManager = null!;
 
-    private _blockNum: number = 0;
+    private _dragNum: number = 0;
     private _hexSkinCountMax: number = 0;
     private _hexSkinCountLimit: number = 0
 
@@ -50,32 +50,33 @@ export class HexDragControl extends Component {
     init(skinCount: number, createSkinCount: number) {
         this._hexSkinCountMax = skinCount;
         this._hexSkinCountLimit = createSkinCount;
-        this._blockNum = this.blockCount;
+        this._dragNum = this.dragCount;
         this.generateDragList();
     }
 
     substractCount() {
-        this._blockNum--;
-        if (this._blockNum <= 0) {
-            this._blockNum = this.blockCount;
+        this._dragNum--;
+        if (this._dragNum <= 0) {
+            this._dragNum = this.dragCount;
             this.generateDragList();
         }
     }
 
     generateDragList() {
         const hexCount = math.randomRangeInt(1, this.hexGridManager.maxHexCount);
-        this.generateDragHexs(hexCount);
+        this.generateDragHexs(2);
     }
 
     /** 批量生成拖拽节点 */
     generateDragHexs(hexCount: number) {
         const startPoint = Constant.HEX_DRAG_START_POINT;
 
-        for(let j = 0; j < this.blockCount; j++){
+        for(let j = 0; j < this.dragCount; j++){
             const space = Math.abs(startPoint.x);
             const pos = new Vec3(startPoint.x + space * j, startPoint.y, startPoint.z);
             const hexDrag = this.generateDrag(pos);
             
+            pos.y += Constant.HEX_SIZE_Y_H;
             const hexList = Constant.hexManager.batchGenerateHexList(hexCount, pos, this._hexSkinCountLimit, this._hexSkinCountMax);
             hexDrag.setHexList(hexList);
 
@@ -96,6 +97,7 @@ export class HexDragControl extends Component {
         dragNode.active = true;
         
         const hexDragComp = dragNode.getComponent(HexDrag);
+        hexDragComp.setDataProp(pos);
         return hexDragComp;
     }
 
@@ -106,10 +108,7 @@ export class HexDragControl extends Component {
     }
 
     setHexGridSkin(hexGrid: HexGrid) {
-        if (this._lastHexGrid) {
-            if (this._lastHexGrid.uuid === hexGrid.uuid) return;
-            this.removeHexGridSkin();
-        }
+        this.removeHexGridSkin();
         Constant.hexGridManager.setGridSkin(1, hexGrid);
     }
 
@@ -126,7 +125,7 @@ export class HexDragControl extends Component {
             const hitNode = res.collider.node
             // console.log('hitNode', hitNode)
             if (hitNode.name.startsWith(Constant.CollisionType.DRAG_NAME)) {
-                console.log('击中目标')
+                // console.log('击中目标')
                 // hitPoint
                 const hitPoint: Vec3 = res.hitPoint;
                 const drag = hitNode.getComponent(HexDrag);
@@ -134,7 +133,7 @@ export class HexDragControl extends Component {
                 this._moveDrag = drag;
 
                 const hexGrid = Constant.hexGridManager.getGridByPos(hitPoint);
-                console.log('hitPoint, hexGrid', hitPoint, hexGrid);
+                // console.log('hitPoint, hexGrid', hitPoint, hexGrid);
                 if (hexGrid && hexGrid.isActive() && hexGrid.isEmpty()) {
                     this.setHexGridSkin(hexGrid);
                     this._lastHexGrid = hexGrid;
@@ -151,7 +150,6 @@ export class HexDragControl extends Component {
     onTouchEnd(event: EventTouch) {
         console.log('this._lastHexGrid', this._lastHexGrid)
         if (this._lastHexGrid && this._moveDrag) {
-            // TODO
             this.substractCount();
             const hexList = this._moveDrag.getHexList();
 
@@ -159,6 +157,8 @@ export class HexDragControl extends Component {
             if (result) {
                 this._moveDrag.node.destroy();
             }
+            // 相邻消除
+            Constant.hexGridManager.removeHexGridData(this._lastHexGrid);
         } else {
             console.log('恢复原来位置');
             if (this._moveDrag) {

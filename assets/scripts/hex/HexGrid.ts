@@ -6,15 +6,17 @@ const { ccclass, property } = _decorator;
 
 @ccclass('HexGrid')
 export class HexGrid extends Component {
-    // 类型
+    /** 类型 **/
     public type: number = 0;
-    // 格子中的hex
+    /** 格子中的hex **/
     public hexList: Hex[] = [];
-    // 格子中的hex最大数量
+    /** 格子中的hex最大数量 **/
     public maxHexCount: number = 0;
+    /** 相邻格子颜色相同的标记 **/
+    public isMark: boolean = false;
 
     protected onEnable(): void {
-        const collider = this.getComponent(Collider)
+        // const collider = this.getComponent(Collider)
         // if (collider) {
         //     collider.on('onTriggerEnter', this.onTriggerEnter, this)
         //     collider.on('onTriggerExit', this.onTriggerExit, this)
@@ -22,7 +24,7 @@ export class HexGrid extends Component {
     }
 
     protected onDisable(): void {
-        const collider = this.getComponent(Collider)
+        // const collider = this.getComponent(Collider)
         // if (collider) {
         //     collider.off('onTriggerEnter', this.onTriggerEnter, this)
         //     collider.off('onTriggerExit', this.onTriggerExit, this)
@@ -58,6 +60,10 @@ export class HexGrid extends Component {
         return this.type === 0;
     }
 
+    setIsMark(isMark: boolean) {
+        this.isMark = isMark;
+    }
+
     setHexList(hexList: Hex[]) {
         this.hexList = hexList;
     }
@@ -82,6 +88,10 @@ export class HexGrid extends Component {
         return this.hexList.slice(-k)
     }
 
+    getTopAllSameLength() {
+        return this.getTopAllSame().length
+    }
+
     isEmpty() {
         return this.hexList.length == 0;
     }
@@ -94,10 +104,19 @@ export class HexGrid extends Component {
     // 获取顶部Hex
     getTopHex() {
         const len = this.hexList.length;
-        if (len == 0) {
+        if (len === 0) {
             return null;
         }
         return this.hexList[len - 1];
+    }
+
+    // 获取顶部Hex的类型
+    getTopHexType(): string {
+        const hex = this.getTopHex();
+        if (hex) {
+            return hex.hexType;
+        }
+        return '';
     }
 
     // 移除顶部的hex

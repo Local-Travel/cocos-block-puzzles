@@ -1,12 +1,13 @@
 import { _decorator, Component, tween, v3, Vec3 } from 'cc';
 import { Constant } from '../util/Constant';
+import { Utils } from '../util/Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('Hex')
 export class Hex extends Component {
 
     // 类型
-    public hexType: string = '0';
+    public hexType: string = '';
 
     private _originParent: any = null;
 
@@ -44,10 +45,36 @@ export class Hex extends Component {
         this.hexType = hexType;
     }
 
-    eraseNode() {
-        tween(this.node).to(0.3, { scale: v3(0, 0, 0) }).call(() => {            
+    /** 移除动画 */
+    removeNodeAction(callback: Function = () => {}) {
+        const t = this.removeNodeTask(callback);
+        t.start();
+    }
+
+    removeNodeTask(callback: Function = () => {}) {
+        return tween(this.node).to(0.3, { scale: v3(0, 0, 0) }).call(() => { 
+            // 振动效果
+            Utils.vibrateShort();           
             this.node.destroy();
+            callback();
+        });
+    }
+
+    /** 转移动画 */
+    moveNodeAction(pos: Vec3, callback: Function = () => {}) {
+        tween(this.node).to(0.3, { position: pos, angle: 180 }).call(() => {
+            // 振动效果
+            Utils.vibrateShort(); 
+            callback();
         }).start();
+    }
+
+    moveNodeTask(pos: Vec3, callback: Function = () => {}) {
+        return tween(this.node).to(0.3, { position: pos, angle: 180 }).call(() => {
+            // 振动效果
+            Utils.vibrateShort(); 
+            callback();
+        });
     }
 }
 

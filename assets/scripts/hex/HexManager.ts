@@ -58,14 +58,14 @@ export class HexManager extends Component {
         let len = skinLimitCount;
         skinList = this.getSkinList(skinLimitCount, skinMaxCount);
         len = skinLimitCount > 0 ? Math.min(skinList.length, skinLimitCount) : skinList.length;
-        let index = 0;
+        let index = 1;
         for(let i = 0; i < len; i++) {
             const max = Math.floor(num / (len - i));
             const n = i !== len - 1 ? math.randomRangeInt(1, max + 1) : num;
             num -= n;
             for(let j = 0; j < n; j++) {
                 const newPos = pos.clone();
-                newPos.y = Utils.getListHexYH(index++);
+                newPos.y = pos.y + Utils.getListHexYH(index++);
                 const hex = this.createHex(newPos, skinList[i]);
                 hexList.push(hex);
             }

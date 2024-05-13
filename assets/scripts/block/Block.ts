@@ -19,7 +19,7 @@ export class Block extends Component {
         this.blockType = blockType;
     }
 
-    eraseNode() {
+    removeNodeAction() {
         if (this.blockType) {
             return
         }

@@ -357,7 +357,7 @@ export class BlockManager extends Component {
                 if (!gridPos) continue;
                 const blockNode = gridPos[2];
                 if (blockNode) {
-                    blockNode.getComponent(Block).eraseNode()
+                    blockNode.getComponent(Block).removeNodeAction()
                 }
                 this.setGridPosVal(index, 0, null);
             }

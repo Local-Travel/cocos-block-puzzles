@@ -11,12 +11,12 @@ export class HexDrag extends Component {
     private _isDragAbled: boolean = true;
 
     onLoad() {
-        this._originPos = this.node.position.clone();
+        // this._originPos = this.node.position.clone();
     }
 
 
     start() {
-
+        this._originPos = this.node.position.clone();
     }
 
     update(deltaTime: number) {
@@ -24,6 +24,11 @@ export class HexDrag extends Component {
     }
 
     onDestroy() {}
+
+    setDataProp(pos: Vec3, isDragAbled: boolean = true) {
+        this._originPos = pos;
+        this._isDragAbled = isDragAbled;
+    }
 
     setDragAbled(isDragAbled: boolean) {
         this._isDragAbled = isDragAbled;
@@ -55,6 +60,21 @@ export class HexDrag extends Component {
 
     getHexList() {
         return this.hexList;
+    }
+
+    getTopAllSameLength() {
+        let len = this.hexList.length, k = 1
+        if (!len) return []
+        const top = this.hexList[len - 1]
+        for(let i = len - 2; i >= 0; i--) {
+            const hex = this.hexList[i]
+            if (hex && top && hex.hexType === top.hexType) {
+                k++
+            } else {
+                break
+            }
+        }
+        return k;
     }
 }
 

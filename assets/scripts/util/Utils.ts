@@ -1,4 +1,5 @@
-import { Color, Graphics, Vec2, Vec3, _decorator, math, sys } from 'cc';
+import { Color, Graphics, Vec2, Vec3, _decorator, math, sys, log } from 'cc';
+import { WECHAT, BYTEDANCE, BAIDU } from "cc/env"
 import { Constant } from './Constant';
 
 export class Utils {
@@ -21,7 +22,7 @@ export class Utils {
         const radius = size / 2;
         const h = 1 / 2 * radius * Math.sqrt(3);
         const x = startX + radius + col * 1.5 * radius;
-        const y = startY - (h + col % 2 * h + row * 2 * h);
+        const y = startY + (h + col % 2 * h + row * 2 * h);
         return new Vec3(x, 0, y);
     }
 
@@ -32,37 +33,26 @@ export class Utils {
         const x = pos.x;
         const y = pos.z;
         const col = Math.round((x - startX - radius) / (1.5 * radius));
-        const row = Math.round((startY - y - col % 2 * h - h) / ( 2 * h));
+        const row = Math.round((y - startY - col % 2 * h - h) / ( 2 * h));
         return [row, col];
+    }
+
+    /** 3d模型，计算左上角的起始点 */
+    static getLeftBottomPoint(row: number, col: number) {
+      const size = Constant.HEX_SIZE;
+      const r = size / 2;
+      const startX = - (col - 1) * r;
+
+      const z = Constant.HEX_GRID_START_POINT_Z;
+      const h = 2 * r * Math.sqrt(3);
+      const startZ = z - h * (row - 1);
+
+      return new Vec3(startX, 0, startZ);
     }
 
     /** hex在3d数组中的高度 */
     static getListHexYH(index: number) {
         return Constant.HEX_SIZE_Y_H * index;
-    }
-
-    /** 是否超出边界 */
-    static checkOutOfBounds(pos: Vec3, box: math.Rect, s: number = 0) {
-        const { x, y, width, height } = box;
-        const { x: dx, y: dy } = pos;
-        let xLeft = x + s;
-        let xRight = x + width - s;
-        let yTop = y + height - s;
-        let yBottom = y + s;
-        if (x === 0 && y === 0) {// 说明是左下角起始点的
-            const sw = width / 2;
-            const sh = height / 2;
-            xLeft = -sw + s;
-            xRight = sw - s;
-            yTop = sh - s;
-            yBottom = -sh + s;
-        }
-        // console.log(pos, parentBox);
-        if (dx < xLeft || dx > xRight || dy < yBottom || dy > yTop) {
-            console.log('超出边界');
-            return true;
-        }
-        return false;
     }
 
     /** 画一个实体六边形 */
@@ -146,5 +136,95 @@ export class Utils {
         }
         return null
     }
+
+ /**
+ * 调用振动效果
+ */
+  static vibrateShort() {
+    if (WECHAT && typeof (<any>window).wx !== undefined) {// 微信
+      (<any>window).wx.vibrateShort({
+        type: 'heavy',
+        success: () => log('调用振动成功'),
+        fail: (err) => log('调用振动失败', err),
+      });
+    }
+    if (BYTEDANCE && typeof (<any>window).tt !== undefined) {// 字节
+      (<any>window).tt.vibrateShort({
+        success: () => log('调用振动成功'),
+        fail: (err) => log('调用振动失败', err),
+      });
+    }
+    if (BAIDU && typeof (<any>window).swan !== undefined) {// 百度
+      (<any>window).swan.vibrateShort({
+        success: () => log('调用振动成功'),
+        fail: (err) => log('调用振动失败', err),
+      });
+    }
+  }
+
+  /**
+   * 被动分享
+   */
+  static passiveShare() {
+    if (WECHAT && typeof (<any>window).wx !== undefined) {// 微信
+      // 显示当前页面的转发按钮
+      (<any>window).wx.showShareMenu({
+        withShareTicket: false,
+        menus: ['shareAppMessage', 'shareTimeline'],
+        success: (res) => {
+            console.log('开启被动转发成功！');
+        },
+        fail: (res) => {
+            console.log(res);
+            console.log('开启被动转发失败！');
+        }
+      });
+      
+      // 监听用户点击右上角分享按钮
+      (<any>window).wx.onShareAppMessage((res) => {
+          console.log('用户点击右上角分享按钮', res);
+          return {
+            // title: '',
+            query: 'shareMsg='+'share user2'  // query最大长度(length)为2048
+          }
+      })
+      // 监听用户点击右上角分享按钮
+      (<any>window).wx.onShareTimeline((res) => {
+          console.log('用户点击右上角分享按钮', res);
+          return {
+            // title: '', 
+            query: 'shareMsg='+'share user3'  // query最大长度(length)为2048
+          }
+      })
+    }
+  }
+  
+  /**
+   * 调用主动分享
+   */
+  static activeShare(shareStr: string = 'share user1') {
+    // 主动分享按钮
+    if (WECHAT && typeof (<any>window).wx !== undefined) {// 微信
+      (<any>window).wx.shareAppMessage({
+        // imageUrl: '',
+        query: 'shareMsg=' + shareStr  // query最大长度(length)为2048
+      });
+    }
+  }
+
+  
+  /**
+   * 获取微信分享数据
+   * 当其他玩家从分享卡片上点击进入时，获取query参数
+   * @returns 
+   */
+  static getWXQuery() {
+    if (WECHAT && typeof (<any>window).wx !== undefined) {// 微信
+      let object = (<any>window).wx.getLaunchOptionsSync();
+      let shareMsg = object.query['shareMsg'];
+      console.log(shareMsg);
+      return shareMsg;
+    }
+  }
 }
 
