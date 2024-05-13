@@ -15,6 +15,9 @@ enum EVENT_TYPE {
 /** 公共路径前缀 */
 const COMMON_PATH_PREFIX = 'texture/common/'
 
+/** 数字材质路径前缀 */
+const NUM_PATH_PREFIX = 'material/num/'
+
 // 六边形皮肤管理
 const HEX_SKIN_TYPE = {
   Style1: {// 类型1
@@ -93,7 +96,7 @@ export class Constant {
 
   // path
   static COMMON_PATH_PREFIX = COMMON_PATH_PREFIX; // pic公共路径
-
+  static NUM_PATH_PREFIX = NUM_PATH_PREFIX; // 数字材质路径前缀
 
   // block
   static BLOCK_SIZE = 64; // 大小
@@ -104,6 +107,7 @@ export class Constant {
   static HEX_SIZE_Y_H = 2.5 / 10; // 大小
   static HEX_SKIN_TYPE = HEX_SKIN_TYPE; // 皮肤类型
   static HEX_REMOVE_ONE_SCORE = 1; // 消除分数
+  
 
   // hex-grid 3d模型
   // static HEX_GRID_START_POINT = new Vec3(-8, 0, 8 * 1.5); // 网格起始点

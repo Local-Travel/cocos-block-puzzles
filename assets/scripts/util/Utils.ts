@@ -1,4 +1,4 @@
-import { Color, Graphics, Vec2, Vec3, _decorator, math, sys, log } from 'cc';
+import { Color, Graphics, Vec2, Vec3, _decorator, math, sys, log, resources, Material, MeshRenderer, Node } from 'cc';
 import { WECHAT, BYTEDANCE, BAIDU } from "cc/env"
 import { Constant } from './Constant';
 
@@ -53,6 +53,20 @@ export class Utils {
     /** hex在3d数组中的高度 */
     static getListHexYH(index: number) {
         return Constant.HEX_SIZE_Y_H * index;
+    }
+
+    /** 设置材质 */
+    static setMaterial(meshNode: Node, path: string) {
+      if (meshNode) {
+        resources.load(path, Material, (err, material) => {
+          console.log(err, material);
+          meshNode.getComponent(MeshRenderer).material = material;
+        });
+      }
+    }
+
+    static getNumMaterialPath(num: number) {
+      return Constant.NUM_PATH_PREFIX + num;
     }
 
     /** 画一个实体六边形 */

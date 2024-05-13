@@ -11,6 +11,9 @@ export class HexDragControl extends Component {
     @property(Prefab)
     dragNodePrefab: Prefab = null!;
 
+    @property(Prefab)
+    numPrefab: Prefab = null!;
+
     @property({ type: Camera })
     camera: Camera = null!;
 
@@ -85,6 +88,7 @@ export class HexDragControl extends Component {
                 hex.setParent(hexDrag.node);
             });
 
+            hexDrag.showNum();
             // console.log('generateDragHexs', hexDrag);
         }
     }
@@ -95,9 +99,14 @@ export class HexDragControl extends Component {
         dragNode.setPosition(pos);
         dragNode.setParent(this.node);
         dragNode.active = true;
+
+        const numNode: Node = instantiate(this.numPrefab);
+        numNode.setPosition(Vec3.ZERO);
+        numNode.setParent(dragNode);
+        numNode.active = false;
         
         const hexDragComp = dragNode.getComponent(HexDrag);
-        hexDragComp.setDataProp(pos);
+        hexDragComp.setDataProp(pos, numNode);
         return hexDragComp;
     }
 
@@ -155,7 +164,7 @@ export class HexDragControl extends Component {
 
             const result = Constant.hexGridManager.setGridHexList(this._lastHexGrid, hexList);
             if (result) {
-                this._moveDrag.node.destroy();
+                this._moveDrag.destroyNode();
             }
             // 相邻消除
             Constant.hexGridManager.removeHexGridData(this._lastHexGrid);

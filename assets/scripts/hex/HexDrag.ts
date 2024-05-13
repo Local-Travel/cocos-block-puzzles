@@ -1,11 +1,13 @@
-import { _decorator, Component, Vec3 } from 'cc';
+import { _decorator, Component, Vec3, Node } from 'cc';
 import { Constant } from '../util/Constant';
 import { Hex } from './Hex';
+import { Utils } from '../util/Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('HexDrag')
 export class HexDrag extends Component {
     public hexList: Hex[] = [];
+    public numNode: Node = null;
 
     private _originPos: Vec3 = null;
     private _isDragAbled: boolean = true;
@@ -25,9 +27,9 @@ export class HexDrag extends Component {
 
     onDestroy() {}
 
-    setDataProp(pos: Vec3, isDragAbled: boolean = true) {
+    setDataProp(pos: Vec3, numNode: Node) {
         this._originPos = pos;
-        this._isDragAbled = isDragAbled;
+        this.numNode = numNode;
     }
 
     setDragAbled(isDragAbled: boolean) {
@@ -64,7 +66,7 @@ export class HexDrag extends Component {
 
     getTopAllSameLength() {
         let len = this.hexList.length, k = 1
-        if (!len) return []
+        if (!len) return 0;
         const top = this.hexList[len - 1]
         for(let i = len - 2; i >= 0; i--) {
             const hex = this.hexList[i]
@@ -75,6 +77,27 @@ export class HexDrag extends Component {
             }
         }
         return k;
+    }
+
+    showNum() {
+        const num = this.getTopAllSameLength();
+        if (!this.numNode) return;
+        if (!num) {
+            this.numNode.active = false;
+            return;
+        }
+
+        const mPath = Utils.getNumMaterialPath(num);
+        Utils.setMaterial(this.numNode, mPath);
+        const pos = this.numNode.position.clone();
+        pos.y = (this.hexList.length + 2) * Constant.HEX_SIZE_Y_H;
+        this.numNode.setPosition(pos);
+        this.numNode.active = true;
+    }
+
+    destroyNode() {
+        this.numNode?.destroy();
+        this.node.destroy();
     }
 }
 

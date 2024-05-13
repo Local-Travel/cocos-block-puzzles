@@ -10,6 +10,9 @@ export class HexGridManager extends Component {
     @property(Prefab)
     hexGridPrefab: Prefab = null;// 格子预制体
 
+    @property(Prefab)
+    numPrefab: Prefab = null!;
+
     @property({ type: CCInteger })
     maxHexCount: number = 10;// 格子最大同颜色六边形数量
 
@@ -65,6 +68,8 @@ export class HexGridManager extends Component {
                 if (list[k] > 0) {
                     const hexList = Constant.hexManager.batchGenerateHexList(list[k], pos, this._hexSkinCountLimit, this._hexSkinCountMax);
                     hexGrid.setHexList(hexList);
+
+                    hexGrid.showNum();
                 }
             }
         }
@@ -76,7 +81,13 @@ export class HexGridManager extends Component {
         hexGridNode.setPosition(pos);
         hexGridNode.setParent(this.node);
 
+        const numNode: Node = instantiate(this.numPrefab);
+        numNode.setPosition(Vec3.ZERO);
+        numNode.setParent(hexGridNode);
+        numNode.active = false;
+
         const hexGridComp = hexGridNode.getComponent(HexGrid);
+        hexGridComp.setNumNode(numNode);
         return hexGridComp;
     }
 
@@ -113,6 +124,8 @@ export class HexGridManager extends Component {
                 hex.setPosition(newPos);
                 hex.resetOriginParent();
             });
+
+            hexGrid.showNum();
             return true;
         }
         return false;

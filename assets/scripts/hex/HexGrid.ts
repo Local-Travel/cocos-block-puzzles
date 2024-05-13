@@ -2,6 +2,7 @@ import { _decorator, Collider, Component, ITriggerEvent, Node, Vec3 } from 'cc';
 import { Hex } from './Hex';
 import { Constant } from '../util/Constant';
 import { HexDrag } from './HexDrag';
+import { Utils } from '../util/Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('HexGrid')
@@ -14,6 +15,8 @@ export class HexGrid extends Component {
     public maxHexCount: number = 0;
     /** 相邻格子颜色相同的标记 **/
     public isMark: boolean = false;
+
+    public numNode: Node = null;
 
     protected onEnable(): void {
         // const collider = this.getComponent(Collider)
@@ -47,6 +50,10 @@ export class HexGrid extends Component {
         this.maxHexCount = maxHexCount;
     }
 
+    setNumNode(numNode: Node) {
+        this.numNode = numNode;
+    }
+
     // 获取位置
     getPosition() {
         return this.node.position
@@ -70,6 +77,7 @@ export class HexGrid extends Component {
 
     addHexList(list: Hex[]) {
         this.hexList.push(...list);
+        this.showNum();
     }
 
     // 获取顶部类型相同的Hex
@@ -122,6 +130,23 @@ export class HexGrid extends Component {
     // 移除顶部的hex
     clearTopHexList(len: number) {
         this.setHexList(this.hexList.slice(0, -len));
+        this.showNum();
+    }
+
+    showNum() {
+        const num = this.getTopAllSameLength();
+        if (!this.numNode) return;
+        if (!num) {
+            this.numNode.active = false;
+            return;
+        }
+
+        const mPath = Utils.getNumMaterialPath(num);
+        Utils.setMaterial(this.numNode, mPath);
+        const pos = this.numNode.position.clone();
+        pos.y = (this.hexList.length + 2) * Constant.HEX_SIZE_Y_H;
+        this.numNode.setPosition(pos);
+        this.numNode.active = true;
     }
 
     onTriggerEnter(event: ITriggerEvent) {
