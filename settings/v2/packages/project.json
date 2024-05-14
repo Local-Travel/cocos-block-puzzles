@@ -29,6 +29,10 @@
     {
       "name": "label_canvas",
       "value": 524288
+    },
+    {
+      "name": "drag_layer",
+      "value": 262144
     }
   ]
 }

@@ -125,7 +125,7 @@ export class Constant {
 
   // hex-grid 3d模型
   // static HEX_GRID_START_POINT = new Vec3(-8, 0, 8 * 1.5); // 网格起始点
-  static HEX_GRID_START_POINT_Z = 13; // 网格起始点Z，x需要根据列数动态计算
+  static HEX_GRID_START_POINT_Z = 8; // 网格起始点Z，x需要根据列数动态计算
   static GRID_SKIN_TYPE = GRID_SKIN_TYPE; // 皮肤类型
   static GRID_SKIN_PROPS = GRID_SKIN_PROPS; // 皮肤属性
   static GRID_ACTIVE_CODE_TYPE = 0; // 激活状态类型code

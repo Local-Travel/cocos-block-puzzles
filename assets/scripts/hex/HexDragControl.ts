@@ -153,8 +153,11 @@ export class HexDragControl extends Component {
                 const drag = hitNode.getComponent(HexDrag);
                 drag.setPosition(new Vec3(hitPoint.x, 0, hitPoint.z));
                 this._moveDrag = drag;
-
-                const hexGrid = Constant.hexGridManager.getGridByPos(hitPoint);
+                // 由于拖拽的相机和地图的相机不是同一个，因此需要减去模型大小的影响
+                const pos = hitPoint.clone();
+                pos.z -= 2 * Constant.HEX_SIZE;
+                
+                const hexGrid = Constant.hexGridManager.getGridByPos(pos);
                 // console.log('hitPoint, hexGrid', hitPoint, hexGrid);
                 if (hexGrid && hexGrid.isActive() && hexGrid.isEmpty()) {
                     this.setHexGridSkin(hexGrid);
