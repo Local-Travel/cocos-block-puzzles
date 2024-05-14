@@ -394,9 +394,9 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 30,
+      "x": 5,
       "y": 1.0000000000000002,
-      "z": 60
+      "z": 8
     },
     "_mobility": 0,
     "_layer": 1073741824,
@@ -4890,7 +4890,7 @@
     "hexGridManager": {
       "__id__": 71
     },
-    "userLevelTest": 1,
+    "userLevelTest": 4,
     "_id": "e0b+aQuVpGbr5iuFYW/akJ"
   },
   {

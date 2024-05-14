@@ -10,7 +10,7 @@ interface LevelData {
     name: string
     desc?: string
     col: number
-    /** 格子预设的数据，正数表示hex数量，负数表示格子类型（广告） */
+    /** 格子预设的数据，正数表示hex数量，-5表示格子类型（广告）,其他负数表示不显示 */
     list: number[]
 }
 
@@ -30,28 +30,64 @@ export class HexData {
                 col: 5,
                 list: [
                     0, 0, 0, 0, 0,
+                    0, 0, 5, 0, 0,
+                    0, 0, -5, 2, 0,
                     0, 0, 0, 0, 0,
-                    0, 0, -1, 0, 0,
-                    0, 0, 0, 5, 0,
                     0, 0, 0, 0, 0,
                 ],
             },
             {
                 level: 0,
-                score: 150,
+                score: 130,
                 skinCount: 4,
-                createSkinCount: 2,
+                createSkinCount: 3,
                 targetCount: 0,
                 targetIcon: 0,
                 name: '关卡 2',
                 desc: '',
                 col: 5,
                 list: [
-                    0, 0, 0, 0, 0,
+                    -1, 0, 0, 0, -1,
                     0, 0, 6, 3, 0,
-                    0, 0, -1, 0, 0,
-                    0, 0, 0, 5, 0,
                     0, 0, 0, 0, 0,
+                    0, 0, 0, 5, 0,
+                    -1, 0, 0, 0, -1,
+                ],
+            },
+            {
+                level: 0,
+                score: 160,
+                skinCount: 4,
+                createSkinCount: 3,
+                targetCount: 0,
+                targetIcon: 0,
+                name: '关卡 3',
+                desc: '',
+                col: 5,
+                list: [
+                    -1, -1, 0, 0, -1,
+                    -1, 0, 6, 3, 0,
+                    0, 0, -5, 0, 0,
+                    0, 0, 0, 5, 0,
+                    -1, 0, 0, 0, -1,
+                ],
+            },
+            {
+                level: 0,
+                score: 200,
+                skinCount: 5,
+                createSkinCount: 3,
+                targetCount: 0,
+                targetIcon: 0,
+                name: '关卡 3',
+                desc: '',
+                col: 5,
+                list: [
+                    -1, -1, 0, 0, -1,
+                    -1, 0, 6, 3, 0,
+                    0, 0, -5, 0, 0,
+                    0, 0, -5, 5, 0,
+                    -1, 0, 0, 0, -1,
                 ],
             },
         ]

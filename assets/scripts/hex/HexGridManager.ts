@@ -16,7 +16,7 @@ export class HexGridManager extends Component {
     @property({ type: CCInteger })
     maxHexCount: number = 10;// 格子最大同颜色六边形数量
 
-    private _gridList: HexGrid[] = [];
+    private _gridList: (HexGrid | null)[][] = [];
     private _gridSkinType: string = "Style1";// 格子皮肤类型
     private _hexSkinCountMax: number = 0;
     private _hexSkinCountLimit: number = 0
@@ -42,6 +42,7 @@ export class HexGridManager extends Component {
         this._col = col;
         this._row = Math.ceil(list.length / col);
         this._startPoint = Utils.getLeftBottomPoint(this._row, this._col);
+        this.clearGridList();
         this.draw3DHexGrid(list);
     }
 
@@ -50,23 +51,31 @@ export class HexGridManager extends Component {
         const startPoint = this._startPoint;
         const gridSize = Constant.HEX_SIZE;
 
-        this.clearGridList();
+        // this.clearGridList();
 
         // 左下角开始遍历
         for (let i = 0; i < this._row; i++) {
+            this._gridList[i] = []
             for (let j = 0; j < this._col; j++) {
+                this._gridList[i][j] = null;
+
                 const k = this.getIndex(i, j);
+                const code = list[k];
+                // 小于0和非-5的直接过滤掉
+                if (code < 0 && Math.abs(code) !== Constant.GRID_SKIN_PROPS.VEDIO) {
+                    continue;
+                }
+
                 const pos = Utils.convertRowColToPosHexagon(i, j, gridSize, startPoint.x, startPoint.z);
                 const hexGrid = this.generateGrid(pos);
-                this._gridList[k] = hexGrid;
+                this._gridList[i][j] = hexGrid;
 
-                const skinType = list[k] < 0 ? list[k] : Constant.GRID_SKIN_PROPS.DEFAULT;
-                this.setGridSkin(skinType, hexGrid);
-                hexGrid.setType(skinType);
+                this.setGridSkin(code, hexGrid);
+                hexGrid.setType(code);
                 hexGrid.setMaxHexCount(this.maxHexCount);
 
-                if (list[k] > 0) {
-                    const hexList = Constant.hexManager.batchGenerateHexList(list[k], pos, this._hexSkinCountLimit, this._hexSkinCountMax);
+                if (code > 0) {
+                    const hexList = Constant.hexManager.batchGenerateHexList(code, pos, this._hexSkinCountLimit, this._hexSkinCountMax);
                     hexGrid.setHexList(hexList);
 
                     hexGrid.showNum();
@@ -92,8 +101,22 @@ export class HexGridManager extends Component {
     }
 
     getSkinType(skinType: number) {
+        let code = Math.abs(skinType);
+        switch(code) {
+            case Constant.GRID_SKIN_PROPS.ACTIVE:
+                code = Constant.GRID_SKIN_PROPS.ACTIVE;
+                break;
+            case Constant.GRID_SKIN_PROPS.VEDIO:
+                code = Constant.GRID_SKIN_PROPS.DEFAULT;
+                if (skinType < 0) {
+                    code = Constant.GRID_SKIN_PROPS.VEDIO;
+                }
+                break;
+            default:
+                code = Constant.GRID_SKIN_PROPS.DEFAULT;
+                break;
+        }
         const skinObj = Constant.GRID_SKIN_TYPE[this._gridSkinType]
-        const code = skinType < 0 ? Constant.GRID_SKIN_PROPS.VEDIO : (skinType % skinObj.skinNum);
         const name = skinObj.skin + code
         const path = skinObj.prefix + name
         return [path, name]
@@ -140,9 +163,7 @@ export class HexGridManager extends Component {
             console.log('超出范围');
             return null;
         }
-        const index = this.getIndex(row, col);
-        if (index < 0 || index >= this._gridList.length) return null;
-        return this._gridList[index];
+        return this._gridList[row][col];
     }
 
     getIndex(row: number, col: number) {
@@ -161,9 +182,15 @@ export class HexGridManager extends Component {
             console.log('checkHexGridData', hexGrid);
             if (!hexGrid || !(hexGrid instanceof HexGrid) || hexGrid.isEmpty()) return Promise.resolve();
 
-            const index = this._gridList.findIndex(item => item.node.uuid === hexGrid.node.uuid);
-            // 根据index反推行列
-            const [row, col] = this.getRowColByIndex(index);
+            let row = -1, col = -1;
+            this._gridList.forEach((rows, i) => {
+                const j = rows.findIndex((item) => item && item.node.uuid === hexGrid.node.uuid);
+                if (j > -1) {
+                    row = i;
+                    col = j;
+                }
+            });
+            if (row < 0 || col < 0) return Promise.resolve(-1);
             // 颜色纹理
             const texture = hexGrid.getTopHexType();
             // 标记
@@ -171,20 +198,20 @@ export class HexGridManager extends Component {
 
             // 获取标记的格子列表
             const markGridList = []
-            this._gridList.forEach((item, index) => {
-                if (item.isMark) {
-                    const [row, col] = this.getRowColByIndex(index);
-                    console.log('标记格子', index, row, col);
-                    markGridList.push([item, row, col]);
-                    // 消除标记
-                    item.setIsMark(false);
-                }
+            this._gridList.forEach((list, row) => {
+                (list || []).forEach((item, col) => {
+                    if (item && item.isMark) {
+                        console.log('标记格子', row, col);
+                        markGridList.push([item, row, col]);
+                        // 消除标记
+                        item.setIsMark(false);
+                    }
+                });
             });
+            // 重新排序，为了找出相邻是相连的
+            markGridList.sort((a, b) => a[2] - b[2]);
 
-            console.log('markGridList length', markGridList.length);
-
-            if (markGridList.length < 2) return;
-
+            console.log('markGridList', markGridList);
             // 转移
             await this.moveHexGridData(markGridList, 0);
         } catch (e) {
@@ -196,6 +223,10 @@ export class HexGridManager extends Component {
     async moveHexGridData(markGridList: (HexGrid | number)[], index: number) {
         return new Promise((resolve, reject) => {
             const n = markGridList.length;
+            if (n < 2) {
+                reject(-1);
+                return;
+            }
             if (index >= n - 1) {
                 const last = markGridList[n - 1];
                 console.log('移动完成 row, col', last[1], last[2], markGridList);
@@ -222,6 +253,7 @@ export class HexGridManager extends Component {
                 const y = nexPos.y + (i + 1) * Constant.HEX_SIZE_Y_H;
                 const newPos = new Vec3(nexPos.x, y, nexPos.z);
                 console.log('newPos', newPos);
+                if (!hex) return;
                 const t = tween(hex.node)
                     .delay(0.2)
                     .call(() => {
@@ -232,12 +264,14 @@ export class HexGridManager extends Component {
                 lastHex = hex.node;
             });
 
+            if (!lastHex) return;
             tween(lastHex).sequence(...taskList).call(() => {
                 nexGrid.addHexList(curHexList);
                 curGrid.clearTopHexList(curHexList.length);
 
                 // 移动下一个
                 this.moveHexGridData(markGridList, index + 1);
+                resolve(2);
             }).start();
 
         }).catch((e) => {
@@ -292,6 +326,18 @@ export class HexGridManager extends Component {
 
                     resolve(len);
                 }).start();
+
+                // const numNode = hexGrid.numNode;
+                // if (numNode && numNode.active) {
+                //     const numPos = numNode.position.clone();
+                //     numPos.y = numPos.y - len * Constant.HEX_SIZE_Y_H;
+                    
+                //     console.log('numPos', numPos);
+                //     tween(numNode)
+                //     .delay(0.1)
+                //     .to(0.2, { position: numPos })
+                //     .start();
+                // }
             })
         } catch (e) {
             console.log('e', e);
@@ -310,8 +356,7 @@ export class HexGridManager extends Component {
     async checkSiblingGridSameColor(row: number, col: number, texture: string) {
         console.log('checkSiblingGridSameColor row, col', row, col);
         if (!this.checkGridNotNull(row, col)) return;
-        const index = this.getIndex(row, col);
-        const hexGrid = this._gridList[index];
+        const hexGrid = this._gridList[row][col];
         if (!hexGrid || hexGrid.isEmpty() || !hexGrid.getTopHexType()) return;
         // 是否同材质
         if (hexGrid.getTopHexType() !== texture) return;
@@ -353,19 +398,21 @@ export class HexGridManager extends Component {
     }
 
     checkGridNotNull(row: number, col: number) {
-        if (row < 0 || row >= this._row || col < 0 || col >= this._col) return false
+        if (row < 0 || row >= this._row 
+            || col < 0 || col >= this._col 
+            || !this._gridList[row] || !this._gridList[row][col]) return false
         return true
     }
 
-    getGridList() {
-        return this._gridList;
-    }
-
     clearGridList() {
-        this._gridList.forEach(item => {
-            if (item && item.node) {
-                item.node.destroy();
-            }
+        this._gridList.forEach((list, i) => {
+            (list || []).forEach((grid, j) => {
+                if (!grid) return;
+                grid.hideNum();
+                if (grid && grid.node) {
+                    grid.node.destroy();
+                }
+            })
         });
         this._gridList = [];
     }

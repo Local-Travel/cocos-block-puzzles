@@ -55,6 +55,9 @@ export class HexDragControl extends Component {
         this._hexSkinCountMax = skinCount;
         this._hexSkinCountLimit = createSkinCount;
         this._dragNum = this.dragCount;
+        this._moveDrag = null;
+        this._lastHexGrid = null;
+        this.clearDragList();
         this.generateDragList();
     }
 
@@ -78,8 +81,6 @@ export class HexDragControl extends Component {
     generateDragHexs(hexCount: number) {
         const startPoint = Constant.HEX_DRAG_START_POINT;
 
-        this.clearDragList();
-        
         for(let j = 0; j < this.dragCount; j++){
             const space = Math.abs(startPoint.x);
             const pos = new Vec3(startPoint.x + space * j, startPoint.y, startPoint.z);

@@ -46,8 +46,12 @@ export class HexGrid extends Component {
 
     }
 
-    setType(type: number) {
-        this.type = type;
+    setType(type: number = Constant.GRID_ACTIVE_CODE_TYPE) {
+        if (type < 0 && Math.abs(type) === Constant.GRID_SKIN_PROPS.VEDIO) {
+            this.type = type
+        } else {
+            this.type = Constant.GRID_ACTIVE_CODE_TYPE
+        }
     }
 
     setMaxHexCount(maxHexCount: number) {
@@ -68,7 +72,7 @@ export class HexGrid extends Component {
     }
 
     isActive() {
-        return this.type === 0;
+        return this.type === Constant.GRID_ACTIVE_CODE_TYPE;
     }
 
     setIsMark(isMark: boolean) {
@@ -135,6 +139,13 @@ export class HexGrid extends Component {
     clearTopHexList(len: number) {
         this.setHexList(this.hexList.slice(0, -len));
         this.showNum();
+    }
+
+    hideNum() {
+        console.log('hide num', this.numNode);
+        if (this.numNode) {
+            this.numNode.active = false;
+        }
     }
 
     showNum() {
