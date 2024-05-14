@@ -22,7 +22,9 @@ export class HexGameManager extends Component {
     @property({ type: CCInteger })
     userLevelTest: number = 0;
 
+
     public levelData: any = null;
+    public gameStatus: number = Constant.GAME_STATE.GAME_READ;
 
     private _userLevel: number = 1;
     private _curScore: number = 0;
@@ -52,6 +54,7 @@ export class HexGameManager extends Component {
         console.log('userLevel', userLevel)
         this._userLevel = userLevel;
         this._curScore = 0;
+        this.gameStatus = Constant.GAME_STATE.GAME_READ;
 
         this.pageHex.init();
         // 设置数据
@@ -61,6 +64,8 @@ export class HexGameManager extends Component {
 
         // 设置拖拽
         this.hexDragControl.init(data.skinCount, data.createSkinCount);
+
+        this.gameStatus = Constant.GAME_STATE.GAME_PLAYING;
     }
 
     updateScore(score: number) {
@@ -69,6 +74,7 @@ export class HexGameManager extends Component {
 
         this.pageHex.addScore(this._curScore);
         if (this._curScore >= this.levelData.score) {
+            this.gameStatus = Constant.GAME_STATE.GAME_OVER;
             // 结束
             Constant.dialogManager.showTipLabel('恭喜你，闯关成功！', () => {
                 // 跳转下一关

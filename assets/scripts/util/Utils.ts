@@ -59,7 +59,7 @@ export class Utils {
     static setMaterial(meshNode: Node, path: string) {
       if (meshNode) {
         resources.load(path, Material, (err, material) => {
-          console.log(err, material);
+          // console.log(err, material);
           meshNode.getComponent(MeshRenderer).material = material;
         });
       }

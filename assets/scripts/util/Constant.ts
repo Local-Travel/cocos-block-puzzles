@@ -60,6 +60,19 @@ enum CollisionType {
   DRAG_TYPE = 3,
 }
 
+
+/**游戏状态 */
+enum GAME_STATE {
+  /** 游戏就绪中 */
+  GAME_READ = 0,
+  /** 游戏进行中 */
+  GAME_PLAYING = 1,
+  /** 游戏暂停 */
+  GAME_PAUSE = 2,
+  /** 游戏结束 */
+  GAME_OVER = 3,
+}
+
 /** 
  * 道具名称
  */
@@ -90,6 +103,7 @@ export class Constant {
   
   
   // game
+  static GAME_STATE = GAME_STATE; // 游戏状态
 
   // event
   static EVENT_TYPE = EVENT_TYPE; // 事件类型
@@ -116,7 +130,7 @@ export class Constant {
   static GRID_SKIN_PROPS = GRID_SKIN_PROPS; // 皮肤属性
 
   // hex-drag
-  static HEX_DRAG_START_POINT = new Vec3(-5, 0, 15); // 网格起始点
+  static HEX_DRAG_START_POINT = new Vec3(-5, 0.25, 15); // 网格起始点
   static CollisionType = CollisionType; // 碰撞类型
 
   // props

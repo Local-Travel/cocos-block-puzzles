@@ -1,4 +1,4 @@
-import { _decorator, Component, Vec3, Node } from 'cc';
+import { _decorator, Component, Vec3, Node, isValid } from 'cc';
 import { Constant } from '../util/Constant';
 import { Hex } from './Hex';
 import { Utils } from '../util/Utils';
@@ -25,7 +25,11 @@ export class HexDrag extends Component {
         
     }
 
-    onDestroy() {}
+    onDestroy() {
+        if (this.numNode && isValid(this.numNode)) {
+            this.numNode.destroy();
+        }
+    }
 
     setDataProp(pos: Vec3, numNode: Node) {
         this._originPos = pos;
@@ -82,7 +86,7 @@ export class HexDrag extends Component {
     showNum() {
         const num = this.getTopAllSameLength();
         if (!this.numNode) return;
-        if (!num) {
+        if (num < 1 || num > 9) {
             this.numNode.active = false;
             return;
         }
@@ -93,11 +97,6 @@ export class HexDrag extends Component {
         pos.y = (this.hexList.length + 2) * Constant.HEX_SIZE_Y_H;
         this.numNode.setPosition(pos);
         this.numNode.active = true;
-    }
-
-    destroyNode() {
-        this.numNode?.destroy();
-        this.node.destroy();
     }
 }
 

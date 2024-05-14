@@ -320,7 +320,7 @@
       "__id__": 12
     },
     "_material": null,
-    "_isTrigger": true,
+    "_isTrigger": false,
     "_center": {
       "__type__": "cc.Vec3",
       "x": 0,

@@ -58,6 +58,8 @@ export class HexDragControl extends Component {
     }
 
     substractCount() {
+        if (Constant.hexGameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
+
         this._dragNum--;
         if (this._dragNum <= 0) {
             this._dragNum = this.dragCount;
@@ -66,8 +68,9 @@ export class HexDragControl extends Component {
     }
 
     generateDragList() {
-        const hexCount = math.randomRangeInt(1, this.hexGridManager.maxHexCount);
-        this.generateDragHexs(2);
+        const maxCount = this.hexGridManager.maxHexCount;
+        const hexCount = math.randomRangeInt(1, maxCount);
+        this.generateDragHexs(hexCount);
     }
 
     /** 批量生成拖拽节点 */
@@ -79,7 +82,6 @@ export class HexDragControl extends Component {
             const pos = new Vec3(startPoint.x + space * j, startPoint.y, startPoint.z);
             const hexDrag = this.generateDrag(pos);
             
-            pos.y += Constant.HEX_SIZE_Y_H;
             const hexList = Constant.hexManager.batchGenerateHexList(hexCount, pos, this._hexSkinCountLimit, this._hexSkinCountMax);
             hexDrag.setHexList(hexList);
 
@@ -121,19 +123,25 @@ export class HexDragControl extends Component {
         Constant.hexGridManager.setGridSkin(1, hexGrid);
     }
 
+    isMoveDrag(dragNode: Node) {
+        if (!this._moveDrag) return true;
+        return this._moveDrag.node.uuid === dragNode.uuid;
+    }
+
     onTouchStart(event: EventTouch) {
-        // this._startPos = drag.getPosition();
-        this._moveDrag = null;
+        if (Constant.hexGameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
     }
 
     onTouchMove(event: EventTouch) {
+        if (Constant.hexGameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
+
         let ray = this.camera.screenPointToRay(event.getLocationX(), event.getLocationY())
 
         if (PhysicsSystem.instance.raycastClosest(ray)) {
             const res = PhysicsSystem.instance.raycastClosestResult
             const hitNode = res.collider.node
             // console.log('hitNode', hitNode)
-            if (hitNode.name.startsWith(Constant.CollisionType.DRAG_NAME)) {
+            if (hitNode.name.startsWith(Constant.CollisionType.DRAG_NAME) && this.isMoveDrag(hitNode)) {
                 // console.log('击中目标')
                 // hitPoint
                 const hitPoint: Vec3 = res.hitPoint;
@@ -157,6 +165,8 @@ export class HexDragControl extends Component {
     }
 
     onTouchEnd(event: EventTouch) {
+        if (Constant.hexGameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
+
         console.log('this._lastHexGrid', this._lastHexGrid)
         if (this._lastHexGrid && this._moveDrag) {
             this.substractCount();
@@ -164,10 +174,10 @@ export class HexDragControl extends Component {
 
             const result = Constant.hexGridManager.setGridHexList(this._lastHexGrid, hexList);
             if (result) {
-                this._moveDrag.destroyNode();
+                this._moveDrag.node.destroy();
             }
-            // 相邻消除
-            Constant.hexGridManager.removeHexGridData(this._lastHexGrid);
+            // 检测相邻格子并消除
+            Constant.hexGridManager.checkHexGridData(this._lastHexGrid);
         } else {
             console.log('恢复原来位置');
             if (this._moveDrag) {
@@ -176,6 +186,7 @@ export class HexDragControl extends Component {
         }
         this.removeHexGridSkin();
         this._lastHexGrid = null;
+        this._moveDrag = null;
     }
 }
 

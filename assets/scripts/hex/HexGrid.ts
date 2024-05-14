@@ -1,4 +1,4 @@
-import { _decorator, Collider, Component, ITriggerEvent, Node, Vec3 } from 'cc';
+import { _decorator, Collider, Component, ITriggerEvent, Node, isValid, Vec3 } from 'cc';
 import { Hex } from './Hex';
 import { Constant } from '../util/Constant';
 import { HexDrag } from './HexDrag';
@@ -40,6 +40,12 @@ export class HexGrid extends Component {
 
     update(deltaTime: number) {
         
+    }
+
+    onDestroy() {
+        if (this.numNode && isValid(this.numNode)) {
+            this.numNode.destroy();
+        }
     }
 
     setType(type: number) {
@@ -93,7 +99,7 @@ export class HexGrid extends Component {
                 break
             }
         }
-        return this.hexList.slice(-k)
+        return this.hexList.slice(-k).reverse();
     }
 
     getTopAllSameLength() {
@@ -136,7 +142,7 @@ export class HexGrid extends Component {
     showNum() {
         const num = this.getTopAllSameLength();
         if (!this.numNode) return;
-        if (!num) {
+        if (num < 1 || num > 9) {
             this.numNode.active = false;
             return;
         }
