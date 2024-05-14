@@ -43,9 +43,7 @@ export class HexGrid extends Component {
     }
 
     onDestroy() {
-        if (this.numNode && isValid(this.numNode)) {
-            this.numNode.destroy();
-        }
+
     }
 
     setType(type: number) {
@@ -142,7 +140,7 @@ export class HexGrid extends Component {
     showNum() {
         const num = this.getTopAllSameLength();
         if (!this.numNode) return;
-        if (num < 1 || num > 9) {
+        if (num < 1 || num > 20) {
             this.numNode.active = false;
             return;
         }

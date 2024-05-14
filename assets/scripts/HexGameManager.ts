@@ -72,7 +72,8 @@ export class HexGameManager extends Component {
         const newScore = Constant.HEX_REMOVE_ONE_SCORE * score;
         this._curScore += newScore;
 
-        this.pageHex.addScore(this._curScore);
+        this.pageHex.addScore(newScore);
+        console.log('updateScore', this._curScore);
         if (this._curScore >= this.levelData.score) {
             this.gameStatus = Constant.GAME_STATE.GAME_OVER;
             // 结束

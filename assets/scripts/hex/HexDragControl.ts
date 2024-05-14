@@ -29,6 +29,7 @@ export class HexDragControl extends Component {
 
     private _moveDrag: HexDrag = null;
     private _lastHexGrid: HexGrid = null;
+    private _dragList: HexDrag[] = [];
 
     protected onEnable(): void {
         input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
@@ -77,6 +78,8 @@ export class HexDragControl extends Component {
     generateDragHexs(hexCount: number) {
         const startPoint = Constant.HEX_DRAG_START_POINT;
 
+        this.clearDragList();
+        
         for(let j = 0; j < this.dragCount; j++){
             const space = Math.abs(startPoint.x);
             const pos = new Vec3(startPoint.x + space * j, startPoint.y, startPoint.z);
@@ -91,6 +94,7 @@ export class HexDragControl extends Component {
             });
 
             hexDrag.showNum();
+            this._dragList.push(hexDrag);
             // console.log('generateDragHexs', hexDrag);
         }
     }
@@ -187,6 +191,17 @@ export class HexDragControl extends Component {
         this.removeHexGridSkin();
         this._lastHexGrid = null;
         this._moveDrag = null;
+    }
+
+    clearDragList() {
+        if (this._dragList.length) {
+            this._dragList.forEach(drag => {
+                if (drag && drag.node) {
+                    drag.node.destroy();
+                }
+            })
+            this._dragList = [];
+        }
     }
 }
 

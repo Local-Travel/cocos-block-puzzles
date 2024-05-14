@@ -25,12 +25,6 @@ export class HexDrag extends Component {
         
     }
 
-    onDestroy() {
-        if (this.numNode && isValid(this.numNode)) {
-            this.numNode.destroy();
-        }
-    }
-
     setDataProp(pos: Vec3, numNode: Node) {
         this._originPos = pos;
         this.numNode = numNode;
@@ -86,7 +80,7 @@ export class HexDrag extends Component {
     showNum() {
         const num = this.getTopAllSameLength();
         if (!this.numNode) return;
-        if (num < 1 || num > 9) {
+        if (num < 1 || num > 20) {
             this.numNode.active = false;
             return;
         }
