@@ -228,6 +228,10 @@ export class HexGridManager extends Component {
             // 颜色纹理
             const texture = hexGrid.getTopHexType();
             console.log('row, col, texture', row, col, texture);
+            if (!texture) {// 如果纹理为空，说明是非法数据，立刻清除该grid的所有数据
+                this.checkAndDelInvalidNode(hexGrid, 0);
+                return resolve([]);
+            }
             // 标记
             this.checkSiblingGridSameColor(row, col, texture);
 
@@ -385,6 +389,7 @@ export class HexGridManager extends Component {
                             hex.node.destroy();
                         }
                     });
+                    this.checkAndDelInvalidNode(hexGrid);
                 }
 
                 hexGrid.clearTopHexList(len);
@@ -395,7 +400,6 @@ export class HexGridManager extends Component {
                 this._changeGridQueue.push(hexGrid);
                 this.runNextChangeGrid();
 
-                this.checkAndDelInvalidNode(hexGrid);
             }).start();
 
             // const numNode = hexGrid.numNode;
@@ -442,7 +446,12 @@ export class HexGridManager extends Component {
             console.log('checkSiblingGridSameColor row, col', row, col);
             if (!this.checkGridNotNull(row, col)) return resolve(-1);
             const hexGrid = this._gridList[row][col];
-            if (!hexGrid || hexGrid.isEmpty() || !hexGrid.getTopHexType()) return resolve(-1);
+            if (!hexGrid || hexGrid.isEmpty()) return resolve(-1);
+            if (!hexGrid.getTopHexType()) {
+                // 强行清除非法数据
+                this.checkAndDelInvalidNode(hexGrid, 0);
+                return resolve(-1);
+            }
             // 是否同材质
             if (hexGrid.getTopHexType() !== texture) return resolve(-1);
             // 是否标记过
@@ -499,6 +508,7 @@ export class HexGridManager extends Component {
         tween(hexGrid.node).delay(delay).call(() => {
             // 只要有非法节点存在，该格全部清空
             const topHex = hexGrid.getTopHex();
+            console.log('检测非法节点 topHex', topHex, hexGrid);
             if ((topHex && !topHex.node) || !topHex) {// 非法或者空
                 console.log('检查非法节点并清空')
                 const gridPos = hexGrid.getPosition();
@@ -512,7 +522,7 @@ export class HexGridManager extends Component {
                 hexGrid.setHexList([]);
                 hexGrid.showNum();
             }
-        })
+        }).start();
     }
 
     clearGridList() {
