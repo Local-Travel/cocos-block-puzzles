@@ -187,7 +187,7 @@ export class HexDragControl extends Component {
                 pos.z -= 2 * Constant.HEX_SIZE;
 
                 const hexGrid = Constant.hexGridManager.getGridByPos(pos);
-                // console.log('hitPoint, hexGrid', hitPoint, hexGrid);
+                console.log('hitPoint, hexGrid', hitPoint, hexGrid);
                 if (hexGrid && hexGrid.isActive() && hexGrid.isEmpty()) {
                     this.setHexGridSkin(hexGrid);
                     this._lastHexGrid = hexGrid;

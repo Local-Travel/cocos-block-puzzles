@@ -25,6 +25,9 @@ export class HexGridManager extends Component {
     private _startPoint: Vec3 = new Vec3();// 左下角，格子起始点
     private _gridRotation: Vec3 = new Vec3(0, 0, 0);// 格子旋转
     private _queue: number[] = [];
+    // 变动的格子
+    private _changeGridQueue: (HexGrid)[] = [];
+    private _clearCount: number = 0;
 
     protected __preload(): void {
         Constant.hexGridManager = this;
@@ -181,10 +184,19 @@ export class HexGridManager extends Component {
     }
 
     /** 检测相邻同色格子并消除 */
-    async checkHexGridData(hexGrid: HexGrid) {
+    checkHexGridData(hexGrid: HexGrid) {
+        this._clearCount = 0;
+        this._changeGridQueue.push(hexGrid);
+        this.runNextChangeGrid();
+    }
+
+    /** 检测发生变动格子的颜色 */
+    async checkChangeHexGrid(hexGrid: HexGrid) {
         try {
-            console.log('checkHexGridData', hexGrid);
-            if (!hexGrid || !(hexGrid instanceof HexGrid) || hexGrid.isEmpty()) return Promise.resolve();
+            console.log('checkChangeHexGrid', hexGrid);
+            if (!hexGrid || hexGrid.isEmpty()) {
+                return this.runNextChangeGrid();
+            }
 
             let row = -1, col = -1;
             this._gridList.forEach((rows, i) => {
@@ -194,15 +206,20 @@ export class HexGridManager extends Component {
                     col = j;
                 }
             });
-            if (row < 0 || col < 0) return;
+            if (row < 0 || col < 0) {
+                return this.runNextChangeGrid();
+            }
+            // 不允许同时设置标记，因此加个同步
             const markGridList = await this.getMarkGridList(hexGrid, row, col);
             console.log('markGridList', markGridList);
-            if (!Array.isArray(markGridList) || !markGridList.length) return;
+            if (!Array.isArray(markGridList) || markGridList.length < 2) {
+                return this.runNextChangeGrid();
+            };
             // 转移
-            await this.moveHexGridData(markGridList, 0);
+            this.moveHexGridData(markGridList, 0);
         } catch (e) {
             console.log('error', e);
-            // return Promise.reject(e);
+            this.runNextChangeGrid();
         }
     }
 
@@ -240,78 +257,141 @@ export class HexGridManager extends Component {
         });
     }
 
+    /** 检查下一个变动 */
+    runNextChangeGrid() {
+        if (!this._changeGridQueue.length) {
+            console.log('change count', this._clearCount);
+            return;
+        }
+
+        // 继续检查下一个
+        const nexHexGrid = this._changeGridQueue.shift();
+        if (nexHexGrid) {
+            this.checkChangeHexGrid(nexHexGrid);
+        }
+    }
+
     /** 移动格子的方块 */
-    async moveHexGridData(markGridList: (HexGrid | number)[], index: number) {
-        return new Promise((resolve, reject) => {
-            const n = markGridList.length;
-            if (n < 2) {
-                return resolve(-1);
+    moveHexGridData(markGridList: (HexGrid | number)[], index: number) {
+        const n = markGridList.length;
+        if (n < 2) {
+            return this.runNextChangeGrid();
+        }
+        
+        if (index >= n - 1) {
+            const last = markGridList[n - 1];
+            console.log('移动完成 row, col', last[1], last[2], markGridList);
+            
+            // 消除
+            this.clearHexGridData(last[0]);
+
+            // 继续检查下一个
+            return this.runNextChangeGrid();
+        }
+
+        const cur = markGridList[index];
+        const curGrid: HexGrid = cur[0];
+        const curHexList = curGrid.getTopAllSame();
+
+        const nex = markGridList[index + 1];
+        const nexGrid: HexGrid = nex[0];
+        const topHex = nexGrid.getTopHex();
+        const nexPos = topHex.getPosition().clone();
+
+        console.log('移动方块新位置 pos', nexPos, nex[1], nex[2]);
+
+        let lastHex = null;
+        const taskList = [];
+        curHexList.slice().forEach((hex, i) => {
+            const y = nexPos.y + (i + 1) * Constant.HEX_SIZE_Y_H;
+            const newPos = new Vec3(nexPos.x, y, nexPos.z);
+            console.log('newPos', newPos);
+            if (!hex) return;
+            const t = tween(hex.node)
+                .delay(0.1)
+                .call(() => {
+                    hex.moveNodeAction(newPos, () => { });
+                });
+
+            taskList.push(t);
+            lastHex = hex.node;
+        });
+
+        if (!lastHex) {
+            return this.runNextChangeGrid();
+        }
+
+        tween(lastHex).sequence(...taskList).call(() => {
+            console.log(`移动第${index + 1}次`);
+            // 移动下一个
+            this.moveHexGridData(markGridList, index + 1);
+        }).start();
+
+        nexGrid.addHexList(curHexList);
+        curGrid.clearTopHexList(curHexList.length);
+
+        if (index === 0) {
+            // 塞入变化的格子队列
+            markGridList.forEach((item) => {
+                this._changeGridQueue.push(item[0]);
+            });
+        }
+    }
+
+    /** 消除格子的方块 */
+    clearHexGridData(hexGrid: HexGrid) {
+        try {
+            console.log('hexGrid', hexGrid);
+            if (!hexGrid || !(hexGrid instanceof HexGrid) || hexGrid.isEmpty()) return;
+
+            const lastHexList = hexGrid.getTopAllSame();
+            const len = lastHexList.length;
+            console.log('len', len, this.maxHexCount);
+            if (len < this.maxHexCount) {
+                return;
             }
-            if (index >= n - 1) {
-                const last = markGridList[n - 1];
-                console.log('移动完成 row, col', last[1], last[2], markGridList);
-                // 消除
-                return resolve(this.clearHexGridData(last[0], markGridList));
-            }
-
-            const cur = markGridList[index];
-            const curGrid: HexGrid = cur[0];
-            const curHexList = curGrid.getTopAllSame();
-
-            const nex = markGridList[index + 1];
-            const nexGrid: HexGrid = nex[0];
-            const topHex = nexGrid.getTopHex();
-            const nexPos = topHex.getPosition().clone();
-
-            console.log('移动方块新位置 pos', nexPos, nex[1], nex[2]);
-
             let lastHex = null;
             const taskList = [];
-            curHexList.slice().forEach((hex, i) => {
-                const y = nexPos.y + (i + 1) * Constant.HEX_SIZE_Y_H;
-                const newPos = new Vec3(nexPos.x, y, nexPos.z);
-                console.log('newPos', newPos);
+            lastHexList.slice().forEach((hex, i) => {
                 if (!hex) return;
                 const t = tween(hex.node)
                     .delay(0.1)
                     .call(() => {
-                        hex.moveNodeAction(newPos, () => { });
+                        hex.removeNodeAction(() => { });
                     });
 
                 taskList.push(t);
                 lastHex = hex.node;
             });
 
-            if (!lastHex) return resolve(-1);
-            tween(lastHex).sequence(...taskList).call(() => {
-                nexGrid.addHexList(curHexList);
-                curGrid.clearTopHexList(curHexList.length);
+            if (!lastHex) return;
+            tween(lastHex).sequence(...taskList).call(async () => {
+                hexGrid.clearTopHexList(len);
+                Constant.hexGameManager.updateScore(len);
 
-                // 移动下一个
-                this.moveHexGridData(markGridList, index + 1);
-                resolve(2);
+                this._clearCount += len;
+                // 最后一个变动也要再次检测
+                this._changeGridQueue.push(hexGrid);
+                this.runNextChangeGrid();
             }).start();
 
-        }).catch((e) => {
-            console.log('moveHexGridData e', e)
-            // return Promise.reject(e);
-        });
-    }
+            // const numNode = hexGrid.numNode;
+            // if (numNode && numNode.active) {
+            //     const numPos = numNode.position.clone();
+            //     numPos.y = numPos.y - len * Constant.HEX_SIZE_Y_H;
 
-    /** 消除格子的方块 */
-    clearHexGridData(hexGrid: HexGrid, markGridList: (HexGrid | number)[]) {
-        try {
-            console.log('hexGrid', hexGrid, hexGrid.hexList);
-            if (!hexGrid || !(hexGrid instanceof HexGrid) || hexGrid.isEmpty()) return;
+            //     console.log('numPos', numPos);
+            //     tween(numNode)
+            //     .delay(0.1)
+            //     .to(0.2, { position: numPos })
+            //     .start();
+            // }
 
-            this.clearHexData(hexGrid);
-
-            console.log('recheck markGridList', markGridList);
             // // 任务队列
             // this.taskQueue(markGridList).then((data) => {
             //     console.log('clearHexGridData data', data);
             // });
-            this.runTaskQueue(markGridList, 0);
+            // this.runTaskQueue(markGridList, 0);
         } catch (e) {
             console.log('clearHexGridData e', e)
         }
@@ -321,7 +401,7 @@ export class HexGridManager extends Component {
         if (index >= markGridList.length) return;
         const res = await this.checkHexGridData(markGridList[index][0]);
         console.log('runTaskQueue res', res)
-        const delayTime = 0.1;
+        const delayTime = 0;
         tween(this._queue).delay(delayTime).call(() => {
             this.runTaskQueue(markGridList, index + 1);
         }).start();

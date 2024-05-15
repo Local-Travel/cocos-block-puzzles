@@ -20,7 +20,7 @@ export class HexData {
         const levelList: LevelData[] = [
             {
                 level: 0,
-                score: 50,
+                score: 1000,
                 skinCount: 3,
                 createSkinCount: 2,
                 targetCount: 0,
@@ -79,7 +79,7 @@ export class HexData {
                 createSkinCount: 3,
                 targetCount: 0,
                 targetIcon: 0,
-                name: '关卡 3',
+                name: '关卡 4',
                 desc: '',
                 col: 5,
                 list: [

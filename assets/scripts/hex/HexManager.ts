@@ -79,11 +79,13 @@ export class HexManager extends Component {
         if (skinLimit > 0) {
             skinMaxCount = Math.min(skinMaxCount, skinLimit);
         }
+        // console.log('skinLimit', skinLimit, skinMaxCount)
         const skinCount = count > 0 ? count : math.randomRangeInt(1, skinMaxCount + 1);
         const skinList = []
         for(let i = 0; i < skinCount; i++) {
             let rand = math.randomRangeInt(1, 100);
-            rand = rand % (skinMaxCount + 1);
+            rand = rand % skinMaxCount;
+            rand = rand === 0 ? skinCount : rand;
             skinList.push(rand);
         }
         return skinList;

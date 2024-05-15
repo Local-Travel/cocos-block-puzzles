@@ -68,8 +68,8 @@ export class HexGameManager extends Component {
         this.gameStatus = Constant.GAME_STATE.GAME_PLAYING;
     }
 
-    updateScore(score: number) {
-        const newScore = Constant.HEX_REMOVE_ONE_SCORE * score;
+    updateScore(count: number) {
+        const newScore = Constant.HEX_REMOVE_ONE_SCORE * count;
         this._curScore += newScore;
 
         this.pageHex.addScore(newScore);

@@ -6,11 +6,11 @@ const { ccclass, property } = _decorator;
 
 @ccclass('HexDrag')
 export class HexDrag extends Component {
-    public hexList: Hex[] = [];
     public numNode: Node = null;
 
     private _originPos: Vec3 = null;
     private _isDragAbled: boolean = true;
+    private _hexList: Hex[] = [];
 
     onLoad() {
         // this._originPos = this.node.position.clone();
@@ -54,20 +54,20 @@ export class HexDrag extends Component {
         this.node.setScale(x, y, z);
     }
 
-    setHexList(hexList: any[]) {
-        this.hexList = hexList;
+    setHexList(_hexList: any[]) {
+        this._hexList = _hexList;
     }
 
     getHexList() {
-        return this.hexList;
+        return this._hexList;
     }
 
     getTopAllSameLength() {
-        let len = this.hexList.length, k = 1
+        let len = this._hexList.length, k = 1
         if (!len) return 0;
-        const top = this.hexList[len - 1]
+        const top = this._hexList[len - 1]
         for(let i = len - 2; i >= 0; i--) {
-            const hex = this.hexList[i]
+            const hex = this._hexList[i]
             if (hex && top && hex.hexType === top.hexType) {
                 k++
             } else {
@@ -88,7 +88,7 @@ export class HexDrag extends Component {
         const mPath = Utils.getNumMaterialPath(num);
         Utils.setMaterial(this.numNode, mPath);
         const pos = this.numNode.position.clone();
-        pos.y = (this.hexList.length + 2) * Constant.HEX_SIZE_Y_H;
+        pos.y = (this._hexList.length + 2) * Constant.HEX_SIZE_Y_H;
         this.numNode.setPosition(pos);
         this.numNode.active = true;
     }
