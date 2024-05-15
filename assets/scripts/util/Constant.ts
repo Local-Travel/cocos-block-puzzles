@@ -121,6 +121,7 @@ export class Constant {
   static HEX_SIZE_Y_H = 2.5 / 10; // 大小
   static HEX_SKIN_TYPE = HEX_SKIN_TYPE; // 皮肤类型
   static HEX_REMOVE_ONE_SCORE = 1; // 消除分数
+  static HEX_NODE_NAME = 'hex'; // hex节点名字
   
 
   // hex-grid 3d模型

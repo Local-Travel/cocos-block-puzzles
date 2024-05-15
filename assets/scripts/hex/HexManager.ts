@@ -85,7 +85,7 @@ export class HexManager extends Component {
         for(let i = 0; i < skinCount; i++) {
             let rand = math.randomRangeInt(1, 100);
             rand = rand % skinMaxCount;
-            rand = rand === 0 ? skinCount : rand;
+            rand = rand === 0 ? skinMaxCount : rand;
             skinList.push(rand);
         }
         return skinList;
@@ -109,6 +109,15 @@ export class HexManager extends Component {
         }
     }
 
+    /** 当前节点下所有子节点 */
+    getHexNodeList() {
+        const childNodeList = (this.node.children || []).filter(item => {
+            return item && item.name === Constant.HEX_NODE_NAME
+        })
+        return childNodeList;
+    }
+
+    /** 所有的hex */
     getHexList() {
         return this._hexList;
     }

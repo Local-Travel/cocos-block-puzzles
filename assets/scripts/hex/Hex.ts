@@ -90,8 +90,8 @@ export class Hex extends Component {
     }
 
     /** 移除动画 */
-    removeNodeAction(callback: Function) {
-        const t = tween(this.node).to(0.3, { scale: v3(0, 0, 0) }).call(() => {
+    removeNodeAction(delay: number, callback: Function) {
+        const t = tween(this.node).to(delay, { scale: v3(0, 0, 0) }).call(() => {
             // 振动效果
             Utils.vibrateShort();
             this.node.destroy();

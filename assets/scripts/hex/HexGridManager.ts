@@ -347,25 +347,46 @@ export class HexGridManager extends Component {
             const lastHexList = hexGrid.getTopAllSame();
             const len = lastHexList.length;
             console.log('len', len, this.maxHexCount);
-            if (len < this.maxHexCount) {
+            if (len < this.maxHexCount || len === 0) {
                 return;
             }
             let lastHex = null;
+            let delNum = 0;
             const taskList = [];
             lastHexList.slice().forEach((hex, i) => {
-                if (!hex) return;
+                // if (!hex) {
+                //     console.warn('销毁异常, i', i, lastHexList);
+                //     return;
+                // }
+                
+                // 两个异步
                 const t = tween(hex.node)
                     .delay(0.1)
                     .call(() => {
-                        hex.removeNodeAction(() => { });
+                        hex.removeNodeAction(0.3, () => {
+                            delNum++;
+                        });
                     });
 
                 taskList.push(t);
                 lastHex = hex.node;
             });
 
-            if (!lastHex) return;
-            tween(lastHex).sequence(...taskList).call(async () => {
+            // 不靠谱
+            tween(lastHex).sequence(...taskList).call(() => {
+                // destroy过程中会发生异常，成功消除的数量不一定等于len
+                console.log('消除格子', hexGrid, len, delNum);
+                // if (len !== delNum) {
+                //     hexGrid.delayCheckInvalidNode(1);
+                // }
+                if (len !== delNum) {// 再次强行删除
+                    lastHexList.forEach(hex => {
+                        if (hex && hex.node) {
+                            hex.node.destroy();
+                        }
+                    });
+                }
+
                 hexGrid.clearTopHexList(len);
                 Constant.hexGameManager.updateScore(len);
 
@@ -373,6 +394,8 @@ export class HexGridManager extends Component {
                 // 最后一个变动也要再次检测
                 this._changeGridQueue.push(hexGrid);
                 this.runNextChangeGrid();
+
+                this.checkAndDelInvalidNode(hexGrid);
             }).start();
 
             // const numNode = hexGrid.numNode;
@@ -405,46 +428,6 @@ export class HexGridManager extends Component {
         tween(this._queue).delay(delayTime).call(() => {
             this.runTaskQueue(markGridList, index + 1);
         }).start();
-    }
-
-    clearHexData(hexGrid: HexGrid) {
-        const lastHexList = hexGrid.getTopAllSame();
-        const len = lastHexList.length;
-        console.log('len', len, this.maxHexCount);
-        if (len < this.maxHexCount) {
-            return;
-        }
-        let lastHex = null;
-        const taskList = [];
-        lastHexList.slice().forEach((hex, i) => {
-            if (!hex) return;
-            const t = tween(hex.node)
-                .delay(0.1)
-                .call(() => {
-                    hex.removeNodeAction(() => { });
-                });
-
-            taskList.push(t);
-            lastHex = hex.node;
-        });
-
-        if (!lastHex) return;
-        tween(lastHex).sequence(...taskList).call(async () => {
-            hexGrid.clearTopHexList(len);
-            Constant.hexGameManager.updateScore(len);
-        }).start();
-
-        // const numNode = hexGrid.numNode;
-        // if (numNode && numNode.active) {
-        //     const numPos = numNode.position.clone();
-        //     numPos.y = numPos.y - len * Constant.HEX_SIZE_Y_H;
-
-        //     console.log('numPos', numPos);
-        //     tween(numNode)
-        //     .delay(0.1)
-        //     .to(0.2, { position: numPos })
-        //     .start();
-        // }
     }
 
     /**
@@ -509,6 +492,27 @@ export class HexGridManager extends Component {
             || col < 0 || col >= this._col
             || !this._gridList[row] || !this._gridList[row][col]) return false
         return true
+    }
+
+    checkAndDelInvalidNode(hexGrid: HexGrid, delay: number = 1) {
+        if (!hexGrid || !hexGrid.node) return;
+        tween(hexGrid.node).delay(delay).call(() => {
+            // 只要有非法节点存在，该格全部清空
+            const topHex = hexGrid.getTopHex();
+            if ((topHex && !topHex.node) || !topHex) {// 非法或者空
+                console.log('检查非法节点并清空')
+                const gridPos = hexGrid.getPosition();
+                const nodeList = Constant.hexManager.getHexNodeList();
+                nodeList.forEach((node) => {
+                    const pos = node.getPosition();
+                    if (pos.x === gridPos.x && pos.z === gridPos.z) {
+                        node.destroy();
+                    }
+                });
+                hexGrid.setHexList([]);
+                hexGrid.showNum();
+            }
+        })
     }
 
     clearGridList() {

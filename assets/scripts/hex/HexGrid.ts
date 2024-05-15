@@ -1,4 +1,4 @@
-import { _decorator, Collider, Component, ITriggerEvent, Node, isValid, Vec3 } from 'cc';
+import { _decorator, Collider, Component, ITriggerEvent, Node, isValid, Vec3, tween } from 'cc';
 import { Hex } from './Hex';
 import { Constant } from '../util/Constant';
 import { HexDrag } from './HexDrag';
@@ -84,6 +84,10 @@ export class HexGrid extends Component {
         this._hexList = hexList;
     }
 
+    getHexList() {
+        return this._hexList;
+    }
+
     addHexList(list: Hex[]) {
         const vList = this.getValidHexList(list);
         this._hexList.push(...vList);
@@ -94,23 +98,32 @@ export class HexGrid extends Component {
         return list.filter(hex => hex && hex.node);
     }
 
-    removeInvalidHex() {
+    checkAndDelInvalid() {
+        const len = this._hexList.length;
         const newList = this.getValidHexList(this._hexList);
-        this._hexList = newList;
+        if (newList.length === len) return false;
+        // 说明有坏数据
+        this.setHexList(newList);
+        return len - newList.length;
     }
+
+    // delayCheckInvalidNode(delay: number) {
+    //     tween(this.node).delay(delay).call(() => {
+    //         if (this.checkAndDelInvalid()) {
+    //             this.showNum();
+    //         }
+    //     });
+    // }
 
     // 获取顶部类型相同的Hex
     getTopAllSame() {
-        let len = this._hexList.length, k = 1
-        if (!len) return []
+        if (!this._hexList.length) return [];
+        let len = this._hexList.length;
         let top = this._hexList[len - 1];
-        if (!top || !top.node) {// 说明有坏数据
-            this.removeInvalidHex();
-            top = this._hexList[len - 1];
-        }
+        let k = 1;
         for(let i = len - 2; i >= 0; i--) {
             const hex = this._hexList[i]
-            if (hex && top && hex.hexType === top.hexType) {
+            if (hex && top && top.hexType && hex.hexType === top.hexType) {
                 k++
             } else {
                 break
@@ -138,7 +151,8 @@ export class HexGrid extends Component {
         if (len === 0) {
             return null;
         }
-        return this._hexList[len - 1];
+        let top = this._hexList[len - 1];
+        return top;
     }
 
     // 获取顶部Hex的类型
@@ -153,11 +167,31 @@ export class HexGrid extends Component {
     // 移除顶部的hex
     clearTopHexList(len: number) {
         this.setHexList(this._hexList.slice(0, -len));
+        // this.resetHexPos();
         this.showNum();
     }
 
+    resetHexPos() {
+        if (!this._hexList || this._hexList.length === 0) return;
+        this._hexList.reduce((pre, cur, i) => {
+            if (i === 0) {
+                const pos = this.node.position.clone();
+                pos.y += Constant.HEX_SIZE_Y_H;
+                cur.node.setPosition(pos);
+                pre = cur;
+            } else if (cur && cur.node) {
+                const pos = cur.node.position.clone();
+                const preY = pre.node.position.y;
+                pos.y = preY + Constant.HEX_SIZE_Y_H;
+                cur.node.setPosition(pos);
+                pre = cur;
+            }
+            return pre;
+        }, this._hexList[0]);
+    }
+
     hideNum() {
-        console.log('hide num', this.numNode);
+        console.log('hidenum', this.numNode);
         if (this.numNode) {
             this.numNode.active = false;
         }
