@@ -1,4 +1,4 @@
-import { _decorator, Camera, CCInteger, Collider, Component, director, EventTouch, geometry, input, Input, instantiate, ITriggerEvent, math, Node, PhysicsSystem, Prefab, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
+import { _decorator, Camera, CCInteger, Collider, Component, director, EventTouch, geometry, input, Input, instantiate, ITriggerEvent, math, Node, PhysicsSystem, Prefab, Quat, Rect, Size, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
 import { Constant } from '../util/Constant';
 import { HexDrag } from './HexDrag';
 import { Utils } from '../util/Utils';
@@ -20,12 +20,16 @@ export class HexDragControl extends Component {
     @property({ type: CCInteger })
     dragCount: number = 3;
 
+    @property(Node)
+    gridNode: Node = null!;
+
     @property(HexGridManager)
     hexGridManager: HexGridManager = null!;
 
     private _dragNum: number = 0;
     private _hexSkinCountMax: number = 0;
-    private _hexSkinCountLimit: number = 0
+    private _hexSkinCountLimit: number = 0;
+    private _RotaValue: number = 0;
 
     private _moveDrag: HexDrag = null;
     private _lastHexGrid: HexGrid = null;
@@ -133,6 +137,31 @@ export class HexDragControl extends Component {
         return this._moveDrag.node.uuid === dragNode.uuid;
     }
 
+    rotateTarget(event: EventTouch) {
+        let delta = event.getDelta();
+    
+        if (delta.x > 0) {
+            this._RotaValue += 10;
+        } else {
+            this._RotaValue -= 10;  
+        }
+        this._RotaValue = this._RotaValue % 360;
+
+
+        // console.log('worldPos, worldRota', this.gridNode.worldPosition, this.gridNode.worldRotation);
+
+        if (this.gridNode && this.gridNode.children) {
+            for(let i = 0; i < this.gridNode.children.length; i++) {
+                const child = this.gridNode.children[i];
+                if (child.name === Constant.CollisionType.GRID_NAME) {
+                    const eulerAngles = child.eulerAngles;
+                    const y = this._RotaValue;
+                    child.eulerAngles = new Vec3(eulerAngles.x, y, eulerAngles.z);
+                }
+            }
+        }
+    }
+
     onTouchStart(event: EventTouch) {
         if (Constant.hexGameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
     }
@@ -156,7 +185,7 @@ export class HexDragControl extends Component {
                 // 由于拖拽的相机和地图的相机不是同一个，因此需要减去模型大小的影响
                 const pos = hitPoint.clone();
                 pos.z -= 2 * Constant.HEX_SIZE;
-                
+
                 const hexGrid = Constant.hexGridManager.getGridByPos(pos);
                 // console.log('hitPoint, hexGrid', hitPoint, hexGrid);
                 if (hexGrid && hexGrid.isActive() && hexGrid.isEmpty()) {
@@ -164,6 +193,8 @@ export class HexDragControl extends Component {
                     this._lastHexGrid = hexGrid;
                     return;
                 }
+            } else if (hitNode.name === Constant.CollisionType.GRID_NAME && !this._moveDrag) {
+                // this.rotateTarget(event);
             }
         } else {
             console.log('射线不包含')
@@ -175,7 +206,7 @@ export class HexDragControl extends Component {
     onTouchEnd(event: EventTouch) {
         if (Constant.hexGameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
 
-        console.log('this._lastHexGrid', this._lastHexGrid)
+        // console.log('this._lastHexGrid', this._lastHexGrid)
         if (this._lastHexGrid && this._moveDrag) {
             this.substractCount();
             const hexList = this._moveDrag.getHexList();

@@ -8,12 +8,12 @@
     "__uuid__": "c8f66d17-351a-48da-a12c-0212d28575c4",
     "__expectedType__": "cc.EffectAsset"
   },
-  "_techIdx": 0,
+  "_techIdx": 1,
   "_defines": [
     {
-      "USE_ALBEDO_MAP": true
+      "USE_ALBEDO_MAP": true,
+      "USE_ALPHA_TEST": true
     },
-    {},
     {},
     {},
     {},
@@ -64,39 +64,45 @@
           {}
         ]
       }
-    },
-    {
-      "rasterizerState": {},
-      "depthStencilState": {},
-      "blendState": {
-        "targets": [
-          {}
-        ]
-      }
     }
   ],
   "_props": [
     {
-      "mainColor": {
-        "__type__": "cc.Color",
-        "r": 165,
-        "g": 161,
-        "b": 161,
-        "a": 255
-      },
+      "alphaThreshold": 0.966,
+      "roughness": 0.833,
       "emissive": {
         "__type__": "cc.Color",
-        "r": 85,
-        "g": 83,
-        "b": 83,
-        "a": 255
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 151
       },
+      "normalStrength": 3.177,
       "mainTexture": {
-        "__uuid__": "2b249a95-b63b-4193-9eba-1b7c507ff9e0@6c48a",
+        "__uuid__": "041d1c51-1efe-4e05-ae4a-2d7a29b68993@6c48a",
+        "__expectedType__": "cc.Texture2D"
+      },
+      "normalMap": {
+        "__uuid__": "041d1c51-1efe-4e05-ae4a-2d7a29b68993@6c48a",
+        "__expectedType__": "cc.Texture2D"
+      },
+      "pbrMap": {
+        "__uuid__": "041d1c51-1efe-4e05-ae4a-2d7a29b68993@6c48a",
+        "__expectedType__": "cc.Texture2D"
+      },
+      "occlusionMap": {
+        "__uuid__": "041d1c51-1efe-4e05-ae4a-2d7a29b68993@6c48a",
+        "__expectedType__": "cc.Texture2D"
+      },
+      "emissiveMap": {
+        "__uuid__": "041d1c51-1efe-4e05-ae4a-2d7a29b68993@6c48a",
+        "__expectedType__": "cc.Texture2D"
+      },
+      "anisotropyMapNearestFilter": {
+        "__uuid__": "041d1c51-1efe-4e05-ae4a-2d7a29b68993@6c48a",
         "__expectedType__": "cc.Texture2D"
       }
     },
-    {},
     {},
     {},
     {},

@@ -77,11 +77,11 @@
   ],
   "_props": [
     {
-      "mainColor": {
+      "emissive": {
         "__type__": "cc.Color",
         "r": 255,
-        "g": 252,
-        "b": 252,
+        "g": 255,
+        "b": 255,
         "a": 255
       },
       "mainTexture": {

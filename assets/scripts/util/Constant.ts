@@ -23,7 +23,7 @@ const HEX_SKIN_TYPE = {
   Style1: {// 类型1
      prefix: 'material/hex/style1/',
      skin: 'hex-skin-',
-     skinNum: 3,
+     skinNum: 7,
   },
 }
 

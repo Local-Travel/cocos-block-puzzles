@@ -90,6 +90,24 @@ export class HexData {
                     -1, 0, 0, 0, -1,
                 ],
             },
+            {
+                level: 0,
+                score: 350,
+                skinCount: 7,
+                createSkinCount: 3,
+                targetCount: 0,
+                targetIcon: 0,
+                name: '关卡 5',
+                desc: '',
+                col: 5,
+                list: [
+                    -1, 0, 0, 0, -1,
+                    0, 0, 6, 3, 0,
+                    0, -5, -5, -5, 0,
+                    0, 0, 0, 5, 0,
+                    -1, 0, 0, 0, -1,
+                ],
+            },
         ]
 
         let data = levelList[0]
