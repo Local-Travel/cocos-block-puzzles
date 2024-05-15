@@ -48,7 +48,7 @@ export class HexGrid extends Component {
     }
 
     setType(type: number = Constant.GRID_ACTIVE_CODE_TYPE) {
-        if (type < 0 && Math.abs(type) === Constant.GRID_SKIN_PROPS.VEDIO) {
+        if (type === Constant.GRID_SKIN_PROPS.VEDIO || type === Constant.GRID_SKIN_PROPS.LOCK) {
             this.type = type
         } else {
             this.type = Constant.GRID_ACTIVE_CODE_TYPE
@@ -191,7 +191,6 @@ export class HexGrid extends Component {
     }
 
     hideNum() {
-        console.log('hidenum', this.numNode);
         if (this.numNode) {
             this.numNode.active = false;
         }
@@ -199,13 +198,18 @@ export class HexGrid extends Component {
 
     showNum() {
         const num = this.getTopAllSameLength();
-        if (!this.numNode) return;
         if (num < 1 || num > 20) {
             this.numNode.active = false;
             return;
         }
+        this.showMaterial(num);
+    }
 
-        const mPath = Utils.getNumMaterialPath(num);
+
+    showMaterial(type: number) {
+        if (!this.numNode) return;
+
+        const mPath = Utils.getNumMaterialPath(type);
         Utils.setMaterial(this.numNode, mPath);
         const pos = this.numNode.position.clone();
         pos.y = (this._hexList.length + 2) * Constant.HEX_SIZE_Y_H;

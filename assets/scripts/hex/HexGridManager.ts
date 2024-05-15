@@ -69,7 +69,7 @@ export class HexGridManager extends Component {
                 const k = this.getIndex(i, j);
                 const code = list[k];
                 // 小于0和非-5的直接过滤掉
-                if (code < 0 && Math.abs(code) !== Constant.GRID_SKIN_PROPS.VEDIO) {
+                if (code < 0 && (code !== Constant.GRID_SKIN_PROPS.VEDIO && code !== Constant.GRID_SKIN_PROPS.LOCK)) {
                     continue;
                 }
 
@@ -86,6 +86,9 @@ export class HexGridManager extends Component {
                     hexGrid.setHexList(hexList);
 
                     hexGrid.showNum();
+                } else if (code === Constant.GRID_SKIN_PROPS.VEDIO || code === Constant.GRID_SKIN_PROPS.LOCK) {
+                    // 视频或等级解锁
+                    hexGrid.showMaterial(code);
                 }
             }
         }
@@ -112,12 +115,6 @@ export class HexGridManager extends Component {
         switch (code) {
             case Constant.GRID_SKIN_PROPS.ACTIVE:
                 code = Constant.GRID_SKIN_PROPS.ACTIVE;
-                break;
-            case Constant.GRID_SKIN_PROPS.VEDIO:
-                code = Constant.GRID_SKIN_PROPS.DEFAULT;
-                if (skinType < 0) {
-                    code = Constant.GRID_SKIN_PROPS.VEDIO;
-                }
                 break;
             default:
                 code = Constant.GRID_SKIN_PROPS.DEFAULT;

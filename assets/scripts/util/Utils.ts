@@ -66,7 +66,7 @@ export class Utils {
   }
 
   static getNumMaterialPath(num: number) {
-    return Constant.NUM_PATH_PREFIX + num;
+    return Constant.HEX_TEXTURE_PATH_PREFIX + num;
   }
 
   /** 画一个实体六边形 */

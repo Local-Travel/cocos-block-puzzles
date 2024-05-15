@@ -16,7 +16,7 @@ enum EVENT_TYPE {
 const COMMON_PATH_PREFIX = 'texture/common/'
 
 /** 数字材质路径前缀 */
-const NUM_PATH_PREFIX = 'material/num/'
+const HEX_TEXTURE_PATH_PREFIX = 'material/num/'
 
 // 六边形皮肤管理
 const HEX_SKIN_TYPE = {
@@ -44,8 +44,10 @@ enum GRID_SKIN_PROPS {
   DEFAULT = 0,
   /** 激活 */
   ACTIVE = 1,
-  /** 视频 */
-  VEDIO = 5,
+  /** 解锁 */
+  VEDIO = -5,
+   /** 视频 */
+  LOCK = -6,
 }
 
 /** 碰撞类型 */
@@ -110,7 +112,7 @@ export class Constant {
 
   // path
   static COMMON_PATH_PREFIX = COMMON_PATH_PREFIX; // pic公共路径
-  static NUM_PATH_PREFIX = NUM_PATH_PREFIX; // 数字材质路径前缀
+  static HEX_TEXTURE_PATH_PREFIX = HEX_TEXTURE_PATH_PREFIX; // 数字材质路径前缀
 
   // block
   static BLOCK_SIZE = 64; // 大小

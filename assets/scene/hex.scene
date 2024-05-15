@@ -1405,7 +1405,7 @@
       "__type__": "cc.Vec3",
       "x": 2.9,
       "y": 0,
-      "z": 1.7
+      "z": 10
     }
   },
   {
@@ -8275,7 +8275,7 @@
     "hexGridManager": {
       "__id__": 88
     },
-    "userLevelTest": 1,
+    "userLevelTest": 3,
     "_id": "e0b+aQuVpGbr5iuFYW/akJ"
   },
   {
