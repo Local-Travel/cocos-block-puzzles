@@ -90,5 +90,14 @@ export class HexGameManager extends Component {
         this.init();
     }
 
+    gameOver() {
+        this.gameStatus = Constant.GAME_STATE.GAME_OVER;
+        // 结束
+        Constant.dialogManager.showTipLabel('很遗憾，闯关失败！', () => {
+            // TODO: 弹框
+            this.init();
+        });
+    }
+
 }
 

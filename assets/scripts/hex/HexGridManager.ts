@@ -262,6 +262,10 @@ export class HexGridManager extends Component {
     runNextChangeGrid() {
         if (!this._changeGridQueue.length) {
             console.log('change count', this._clearCount);
+            if (this.checkGridIsFull()) {
+                // 游戏结束
+                Constant.hexGameManager.gameOver();
+            }
             return;
         }
 
@@ -520,6 +524,18 @@ export class HexGridManager extends Component {
                 hexGrid.showNum();
             }
         }).start();
+    }
+
+    checkGridIsFull() {
+        for(let i = 0; i < this._row; i++) {
+            for(let j = 0; j < this._col; j++) {
+                const grid = this._gridList[i][j];
+                if (grid && grid.isActive() && grid.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     clearGridList() {
