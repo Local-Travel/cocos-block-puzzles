@@ -6,7 +6,7 @@ export class BlockData {
         const levelList = [
             {
                 level: 0,
-                score: 600,
+                score: 100,
                 skinCount: 2,
                 targetCount: 0,
                 targetIcon: 0,
@@ -27,7 +27,7 @@ export class BlockData {
             },
             {
                 level: 0,
-                score: 600,
+                score: 752,
                 skinCount: 2,
                 targetCount: 0,
                 targetIcon: 0,
@@ -48,7 +48,7 @@ export class BlockData {
             },
             {
                 level: 0,
-                score: 600,
+                score: 1024,
                 skinCount: 2,
                 targetCount: 0,
                 targetIcon: 0,

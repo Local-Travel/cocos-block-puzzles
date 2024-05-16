@@ -132,6 +132,10 @@ export class HexDragControl extends Component {
         Constant.hexGridManager.setGridSkin(1, hexGrid);
     }
 
+    useGameSkill(skillName: string) {
+        
+    }
+
     isMoveDrag(dragNode: Node) {
         if (!this._moveDrag) return true;
         return this._moveDrag.node.uuid === dragNode.uuid;

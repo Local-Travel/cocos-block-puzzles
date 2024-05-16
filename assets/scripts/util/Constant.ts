@@ -76,11 +76,13 @@ enum GAME_STATE {
 }
 
 /** 
- * 道具名称
+ * 道具
  */
 enum PROPS_NAME {
   /** 炸弹球 */
   BOMB = 'bomb',
+  /** 锤子 */
+  HAMMER = 'hammer',
 }
 
 /** 道具类型 */
@@ -88,7 +90,13 @@ const PROPS_TYPE = {
   /** 炸弹球 */
   bomb: {
     name: PROPS_NAME.BOMB,
-    desc: '炸弹泡泡可以消除方圆内的泡泡',
+    desc: '炸弹可以炸毁范围内的方块',
+    value: 1,
+  },
+  /** 锤子 */
+  hammer: {
+    name: PROPS_NAME.HAMMER,
+    desc: '锤子可以砸坏3个方块',
     value: 1,
   },
 }
@@ -117,6 +125,7 @@ export class Constant {
   // block
   static BLOCK_SIZE = 64; // 大小
   static BLOCK_REMOVE_ONE_SCORE = 10; // 消除分数
+  static BLOCK_DRAG_NODE_NAME = 'blockDragNode'; // block拖动节点名字
 
   // hex 3d模型
   static HEX_SIZE = 4; // 大小

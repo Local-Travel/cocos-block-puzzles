@@ -56,7 +56,7 @@ export class HexGameManager extends Component {
         this._curScore = 0;
         this.gameStatus = Constant.GAME_STATE.GAME_READ;
 
-        this.pageHex.init();
+        this.pageHex.init(data.score, userLevel);
         // 设置数据
         Constant.hexManager.init();
 
@@ -69,6 +69,7 @@ export class HexGameManager extends Component {
     }
 
     updateScore(count: number) {
+        if (count < 1) return;
         const newScore = Constant.HEX_REMOVE_ONE_SCORE * count;
         this._curScore += newScore;
 
@@ -77,26 +78,20 @@ export class HexGameManager extends Component {
         if (this._curScore >= this.levelData.score) {
             this.gameStatus = Constant.GAME_STATE.GAME_OVER;
             // 结束
-            Constant.dialogManager.showTipLabel('恭喜你，闯关成功！', () => {
-                // 跳转下一关
-                this.nextLevel();
-            });
+            User.instance().setLevel(this._userLevel + 1);
+            Constant.dialogManager.showSuccessModal();
         }
-    }
-
-    nextLevel() {
-        const user = User.instance();
-        user.setLevel(this._userLevel + 1);
-        this.init();
     }
 
     gameOver() {
         this.gameStatus = Constant.GAME_STATE.GAME_OVER;
         // 结束
-        Constant.dialogManager.showTipLabel('很遗憾，闯关失败！', () => {
-            // TODO: 弹框
-            this.init();
-        });
+        Constant.dialogManager.showFailModal();
+    }
+
+
+    useGameSkill(skillName: string) {
+        this.hexDragControl.useGameSkill(skillName);
     }
 
 }

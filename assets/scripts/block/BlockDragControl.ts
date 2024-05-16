@@ -26,21 +26,29 @@ export class BlockDragControl extends Component {
     private _dragReuslt: boolean | [Vec3, number[]] = false;
 
     protected onLoad(): void {
-        this._blockNum = this.blockCount;
         if (this.target) {
             this._targetRect = this.target.getComponent(UITransform).getBoundingBox();
         }
     }
 
     start() {
-        this.generateBlocks();
+        
     }
 
     update(deltaTime: number) {
         
     }
 
+    init() {
+        this._blockNum = this.blockCount;
+        this._dragReuslt = false;
+        this.clearDragBlockList();
+        this.generateBlocks();
+    }
+
     substractCount(drag: BlockDrag) {
+        if (Constant.gameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
+
         this._blockNum--;
         if (this._blockNum <= 0) {
             this._blockNum = this.blockCount;
@@ -104,10 +112,14 @@ export class BlockDragControl extends Component {
     }
 
     handleTouchStart(event: EventTouch, drag: BlockDrag) {
+        if (Constant.gameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
+
         this._startPos = drag.getPosition();
     }
 
     handleTouchMove(event: EventTouch, drag: BlockDrag) {
+        if (Constant.gameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
+
         if (!this._targetRect) return;
         const touchPos = event.getLocation();
         const nPos = drag.getNodeSpacePosition(touchPos);
@@ -140,6 +152,8 @@ export class BlockDragControl extends Component {
     }
 
     handleTouchEnd(event: EventTouch, drag: BlockDrag) {
+        if (Constant.gameManager.gameStatus !== Constant.GAME_STATE.GAME_PLAYING) return;
+
         if (this._dragReuslt) {
             const offset = this._dragReuslt[0];
             const rowColList = this._dragReuslt[1];
@@ -147,8 +161,9 @@ export class BlockDragControl extends Component {
             drag.setPosition(newPos);
 
             Constant.blockManager.setFillPositionByIndex(rowColList, drag.getBlockList());
-            Constant.blockManager.checkBoardFull(rowColList);
             Constant.blockManager.removeRectColor();
+            const count = Constant.blockManager.checkBoardFull(rowColList);
+            Constant.gameManager.updateScore(count);
 
             drag.setParent(this.target);
             drag.setDragAbled(false);
@@ -172,7 +187,9 @@ export class BlockDragControl extends Component {
     checkResult() {
         if (!this.checkEmptyDragBlock()) {// 结束
             console.log('结束');
-            Constant.dialogManager.showTipLabel('已没有可放的位置');
+            Constant.dialogManager.showTipLabel('已没有可放的位置', () => {
+                Constant.gameManager.gameOver();
+            });
         }
     }
 
@@ -187,6 +204,19 @@ export class BlockDragControl extends Component {
             }
         }
         return flag;
+    }
+
+    clearDragBlockList() {
+        this._dragBlockList.forEach((item) => {
+            if (item && item.node) {
+                item.node.destroy();
+            }
+        })
+        this._dragBlockList = []
+    }
+
+    useGameSkill(skillName: string) {
+
     }
 }
 

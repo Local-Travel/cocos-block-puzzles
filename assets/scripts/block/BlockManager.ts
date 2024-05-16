@@ -25,6 +25,7 @@ export class BlockManager extends Component {
     private _gColor: Graphics = null; // 绘制颜色组件
     private _uiTransform: UITransform = null;
     private _blockPosList: any[] = [] // 每个点的位置
+    private _removeBlockCount: number = 0; // 移除的个数
 
     protected __preload(): void {
         Constant.blockManager = this;
@@ -35,15 +36,16 @@ export class BlockManager extends Component {
         this._g = this.boardNode.getComponent(Graphics);
         this._uiTransform = this.boardNode.getComponent(UITransform);
         this.gridSize = this._uiTransform.width / this.lineCount;
-
-        this.drawChessBoard();
     }
 
     start() {
         
     }
 
-    init(list: number[]) {         
+    init(list: number[]) {  
+        this._removeBlockCount = 0; 
+        this.clearBlockPosList();  
+        this.drawChessBoard();    
         this.setBlockPosList(list);
     }
 
@@ -225,6 +227,8 @@ export class BlockManager extends Component {
 
     /** 检查横向纵向是否满了，并销毁 */
     checkBoardFull(rowColList: number[]) {
+        this._removeBlockCount = 0;
+
         const rowList = [];
         const colList = [];
 
@@ -276,12 +280,15 @@ export class BlockManager extends Component {
         if (rowList.length || colList.length) {
             Constant.audioManager.play('erase');
         }
+        
+        return this._removeBlockCount;
     }
 
     /** 检查是否有空模块位置 */
     checkBoardEmptyModelSize(size: number[][]) {
         if (!size || size.length === 0) return true;
-
+        // TODO: 检测结果依然需要优化
+        
         const row = this.lineCount;
         const col = this.lineCount;
         const rowIndexList = [];
@@ -357,6 +364,7 @@ export class BlockManager extends Component {
                 if (!gridPos) continue;
                 const blockNode = gridPos[2];
                 if (blockNode) {
+                    this._removeBlockCount++;
                     blockNode.getComponent(Block).removeNodeAction()
                 }
                 this.setGridPosVal(index, 0, null);
@@ -369,10 +377,22 @@ export class BlockManager extends Component {
         const children = this.boardNode.children
         for(let i = 0; i < children.length; i++) {
             const child = children[i];
-            if (child.name === 'dragNode' && child.children.length === 0) {
+            if (child.name === Constant.BLOCK_DRAG_NODE_NAME && child.children.length === 0) {
                 child.destroy();
             }
         }
+    }
+
+    clearBlockPosList() {
+        this._blockPosList.forEach((item) => {
+            if (item && item.length > 2) {
+                const posNode = item[2];
+                if (posNode) {
+                    posNode.destroy();
+                }
+            }
+        })
+        this._blockPosList = []
     }
 
     handleTouchStart(event: EventTouch, drag: BlockDrag) {

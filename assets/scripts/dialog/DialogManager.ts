@@ -1,7 +1,10 @@
 import { _decorator, Component, Label, Node, resources, Size, Sprite, SpriteFrame, tween, UITransform, Vec3 } from 'cc';
 import { Constant } from '../util/Constant';
-// import { EndlessFail } from './EndlessFail';
 import { Utils } from '../util/Utils';
+import { Fail } from './Fail';
+import { Success } from './Success';
+import { HexFail } from './HexFail';
+import { HexSuccess } from './HexSuccess';
 const { ccclass, property } = _decorator;
 
 @ccclass('DialogManager')
@@ -12,8 +15,14 @@ export class DialogManager extends Component {
     @property(Node)
     PicTip: Node = null
 
-    // @property(EndlessFail)
-    // endlessFail: EndlessFail = null
+    @property(Fail)
+    fail: Fail = null
+    @property(Success)
+    success: Success = null
+    @property(HexFail)
+    hexFail: HexFail = null
+    @property(HexSuccess)
+    hexSuccess: HexSuccess = null
 
     __preload () {
         Constant.dialogManager = this
@@ -27,12 +36,20 @@ export class DialogManager extends Component {
         
     }
 
-    showFail() {
-        // if (Utils.getLocalStorage('scene') == 'GameManager') {
-        //     this.fail.showNode()
-        // } else {
-        //     this.endlessFail.showNode()
-        // }
+    showSuccessModal() {
+        if (Utils.getLocalStorage('scene') == 'GameManager') {
+            this.success.showModal()
+        } else {
+            this.hexSuccess.showModal()
+        }
+    }
+
+    showFailModal() {
+        if (Utils.getLocalStorage('scene') == 'GameManager') {
+            this.fail.showModal()
+        } else {
+            this.hexFail.showModal()
+        }
     }
 
 
